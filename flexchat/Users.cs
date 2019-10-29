@@ -1,0 +1,6 @@
+﻿namespace flexchat
+{
+    class Users
+    {
+    }
+}
