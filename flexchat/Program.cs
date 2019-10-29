@@ -6,11 +6,9 @@ namespace flexchat
     class Program
     {
         static uint WND_WIDTH = 700;
-        static uint WND_HEIGHT = 750;
-        static uint WND_MIN_WIDTH = 400;
-        static uint WND_MIN_HEIGHT = 300;
+        static uint WND_HEIGHT = 500;
 
-        static RenderWindow wnd = new RenderWindow(new SFML.Window.VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
+        public static RenderWindow wnd = new RenderWindow(new SFML.Window.VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
 
         static void Main()
         {
@@ -19,36 +17,29 @@ namespace flexchat
             wnd.Closed += Win_Closed;
             wnd.Resized += Win_Resized;
 
-            RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(100, 100));
-            rect.FillColor = Color.White;
+            Content.Load();
 
-            int vectx = 2, vecty = 2;
+            TextBox loginInput = new TextBox("login", 500, 50, 100, 100);
+            loginInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
+            loginInput.SetTextColor(Content.color2);
 
-            var rand = new Random();
+            TextBox passInput = new TextBox("password", 500, 50, 100, 100);
+            passInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
+            passInput.SetTextColor(Content.color2);
 
             while (wnd.IsOpen)
             {
                 wnd.DispatchEvents();
 
-                wnd.Clear(new Color(44, 47, 51, 1));
+                wnd.Clear(Content.color0);
 
-                SFML.System.Vector2f pos = rect.Position;
-                if (pos.X + vectx <= 0 || pos.X + vectx >= WND_WIDTH - 100)
-                {
-                    vectx *= -1;
-                    rect.FillColor = new Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
-                }
-                if (pos.Y + vecty <= 0 || pos.Y + vecty >= WND_HEIGHT - 100)
-                {
-                    vecty *= -1;
-                    rect.FillColor = new Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
-                }
-                pos.X += vectx;
-                pos.Y += vecty;
+                loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
+                loginInput.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 50;
+                loginInput.Draw();
 
-                rect.Position = pos;
-
-                wnd.Draw(rect);
+                passInput.posX = (wnd.Size.X / 2) - (passInput.sizeX / 2);
+                passInput.posY = (wnd.Size.Y / 2) - passInput.sizeY - 30 + passInput.sizeY;
+                passInput.Draw();
 
                 wnd.Display();
             }
@@ -56,18 +47,17 @@ namespace flexchat
         
         private static void Win_Resized(object sender, SFML.Window.SizeEventArgs e)
         {
-            if (e.Width < WND_MIN_WIDTH)
+            if (e.Width < WND_WIDTH)
             {
-                wnd.Size = new SFML.System.Vector2u(WND_MIN_WIDTH, e.Height);
-                e.Width = WND_MIN_WIDTH;
+                wnd.Size = new SFML.System.Vector2u(WND_WIDTH, e.Height);
+                e.Width = WND_WIDTH;
             }
-            if (e.Height < WND_MIN_HEIGHT)
+            if (e.Height < WND_HEIGHT)
             {
-                wnd.Size = new SFML.System.Vector2u(e.Width, WND_MIN_HEIGHT);
-                e.Height = WND_MIN_HEIGHT;
+                wnd.Size = new SFML.System.Vector2u(e.Width, WND_HEIGHT);
+                e.Height = WND_HEIGHT;
             }
             wnd.SetView(new View(new FloatRect(0, 0, e.Width, e.Height)));
-            WND_WIDTH = e.Width; WND_HEIGHT = e.Height;
         }
 
         private static void Win_Closed(object sender, EventArgs e)
