@@ -6,6 +6,7 @@ namespace flexchat
 {
     class Content
     {
+        public const uint UINT_MAX = 4294967295;
         public const string CONTENT_DIR = "..\\Content\\";
 
         public static Font font;

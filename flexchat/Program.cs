@@ -15,6 +15,14 @@ namespace flexchat
         public static List<TextBox> textBoxes = new List<TextBox>();
         public static List<Button> buttons = new List<Button>();
 
+        private static uint session_key = 0;
+        public static Users Me = new Users();
+
+        public uint SessionKey
+        {
+            set { session_key = value; }
+        }
+
         static void Main()
         {
 
@@ -32,23 +40,33 @@ namespace flexchat
             TextBox loginInput = new TextBox("login", 500, 50, StatusType.ACTIVE);
             loginInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
             loginInput.SetCursor(40, true, "|");
-            loginInput.SetTextColor(Content.color2, Color.White, Color.White);
+            loginInput.SetTextColor(Content.color2, Color.White, Content.color0);
             loginInput.textLengthBound = 24;
             textBoxes.Add(loginInput);
 
             TextBox passInput = new TextBox("password", 500, 50, StatusType.ACTIVE);
             passInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
             passInput.SetCursor(40, true, "|");
-            passInput.SetTextColor(Content.color2, Color.White, Color.White);
+            passInput.SetTextColor(Content.color2, Color.White, Content.color0);
             passInput.textLengthBound = 24;
+            passInput.SetSub("*");
             textBoxes.Add(passInput);
 
-            Button signInButton = new Button("Sign in", 140, 60, StatusType.ACTIVE);
-            signInButton.LoadTextures(Content.button0, Content.button1, Content.button2);
-            signInButton.SetTextColor(Color.White, Content.color3, Content.color1);
-            signInButton.textSize = 30;
-            buttons.Add(signInButton);
+            Button submitButton = new Button("Sign in", 140, 60, StatusType.ACTIVE);
+            submitButton.LoadTextures(Content.button0, Content.button1, Content.button2);
+            submitButton.SetTextColor(Color.White, Content.color3, Content.color1);
+            submitButton.textSize = 30;
+            buttons.Add(submitButton);
 
+            Button chgButton = new Button("Sign up", 80, 12, StatusType.ACTIVE);
+            chgButton.LoadTextures(null, null, null);
+            chgButton.SetTextColor(Content.color3, Color.White, Content.color1);
+            chgButton.textSize = 16;
+            buttons.Add(chgButton);
+
+            byte ARmode = 0;
+
+            uint waitingfor = Content.UINT_MAX;
 
             while (wnd.IsOpen)
             {
@@ -56,21 +74,43 @@ namespace flexchat
 
                 wnd.Clear(Content.color0);
 
-                loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
-                loginInput.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 50;
-                loginInput.Draw();
+                if (session_key == 0)
+                {
+                    loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
+                    loginInput.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 50;
+                    loginInput.Draw();
 
-                passInput.posX = (wnd.Size.X / 2) - (passInput.sizeX / 2);
-                passInput.posY = (wnd.Size.Y / 2) - passInput.sizeY - 30 + passInput.sizeY;
-                passInput.Draw();
+                    passInput.posX = (wnd.Size.X / 2) - (passInput.sizeX / 2);
+                    passInput.posY = (wnd.Size.Y / 2) - 30;
+                    passInput.Draw();
 
-                signInButton.posX = (wnd.Size.X / 2) - (signInButton.sizeX / 2);
-                signInButton.posY = (wnd.Size.Y / 2) + 50;
-                signInButton.Draw();
+                    submitButton.posX = (wnd.Size.X / 2) - (submitButton.sizeX / 2);
+                    submitButton.posY = (wnd.Size.Y / 2) + 50;
+                    submitButton.Draw();
 
-                if (signInButton.Clicked)
-                    Win_Closed(null, null);
+                    chgButton.posX = (wnd.Size.X / 2) + (passInput.sizeX / 2) - (chgButton.sizeX);
+                    chgButton.posY = (wnd.Size.Y / 2) + passInput.sizeY / 2 + 5;
+                    chgButton.Draw();
 
+                    if (submitButton.Clicked())
+                    {
+                        var err = Me.Authorize(ARmode, loginInput.Text(), passInput.Text());
+                        submitButton.Status = StatusType.BLOCKED;
+                        chgButton.Status = StatusType.BLOCKED;
+                        loginInput.Status = StatusType.BLOCKED;
+                        passInput.Status = StatusType.BLOCKED;
+                    }
+
+                    if (chgButton.Clicked())
+                    {
+                        ARmode = (byte)((int)1 - (int)ARmode);
+                        string s = chgButton.Text;
+                        chgButton.Text = submitButton.Text;
+                        submitButton.Text = s;
+                        loginInput.Clear();
+                        passInput.Clear();
+                    }
+                }
                 wnd.Display();
             }
         }

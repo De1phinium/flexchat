@@ -7,10 +7,26 @@ namespace flexchat
     {
         private string text;
 
-        public bool Clicked;
+        private bool WasClicked;
 
         private Color[] textColor;
         public uint textSize;
+
+        public string Text
+        {
+            get { return text;  }
+            set { text = value;  }
+        }
+
+        public bool Clicked()
+        {
+            if (WasClicked)
+            {
+                WasClicked = false;
+                return true;
+            }
+            return false;
+        }
 
         public Button(string text, uint size_x, uint size_y, StatusType status)
         {
@@ -19,7 +35,7 @@ namespace flexchat
             this.size_y = size_y;
             this.status = status;
             textColor = new Color[3];
-            Clicked = false;
+            WasClicked = false;
         }
 
         public void Update(MouseMoveEventArgs e)
@@ -42,7 +58,7 @@ namespace flexchat
                 return;
             if (e.Button == Mouse.Button.Left && status == StatusType.SELECTED)
             {
-                Clicked = true;
+                WasClicked = true;
             }
         }
 
@@ -59,6 +75,7 @@ namespace flexchat
                 Texture = textures[(byte)status],
                 Position = new SFML.System.Vector2f(pos_x, pos_y)
             };
+            if (rect.Texture == null) rect.FillColor = Content.color0;
             Program.wnd.Draw(rect);
             Text text = new Text
             {
@@ -67,7 +84,7 @@ namespace flexchat
                 DisplayedString = this.text,
                 CharacterSize = textSize
             };
-            text.Position = new SFML.System.Vector2f(pos_x + (size_x / 2) - text.DisplayedString.Length / 2 * text.CharacterSize / 2 - 2, pos_y + size_y / 2 - text.CharacterSize / 2 - 2);
+            text.Position = new SFML.System.Vector2f(pos_x + (size_x / 2) - text.DisplayedString.Length / 2 * text.CharacterSize / 2 - 4, pos_y + size_y / 2 - text.CharacterSize / 2 - 4);
             Program.wnd.Draw(text);
         }
     }

@@ -11,6 +11,7 @@ namespace flexchat
         private short blink;
         private bool CursorBlinking;
         private string cursor;
+        private string sub;
 
         public uint textLengthBound = 255;
 
@@ -30,6 +31,12 @@ namespace flexchat
             textures = new Texture[3];
             rect = new RectangleShape(new SFML.System.Vector2f(size_x, size_y));
             textColor = new Color[3];
+            sub = "";
+        }
+
+        public void SetSub(string sub)
+        {
+            this.sub = sub;
         }
 
         public void SetCursor(short ratio, bool blinking, string cursor)
@@ -38,6 +45,16 @@ namespace flexchat
             blink = cursorBlinkingRatio;
             CursorBlinking = blinking;
             this.cursor = cursor;
+        }
+
+        public string Text()
+        {
+            return typed;
+        }
+
+        public void Clear()
+        {
+            typed = "";
         }
 
         public void Update(TextEventArgs e)
@@ -91,14 +108,37 @@ namespace flexchat
             rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
             rect.Texture = textures[(uint)status];
             rect.Size = new SFML.System.Vector2f(size_x, size_y);
+            if (rect.Texture == null) rect.FillColor = Content.color0;
             Program.wnd.Draw(rect);
             Text text = new Text();
-            text.Color = textColor[(byte)StatusType.ACTIVE];
+            text.Color = textColor[(byte)status];
+            bool hidden = false;
             if (typed == "") text.DisplayedString = default_String;
-            else text.DisplayedString = typed;
-            if (Status == StatusType.SELECTED)
+            else
             {
                 text.DisplayedString = typed;
+                if (sub != "")
+                {
+                    string s = "";
+                    for (int i = 0; i < text.DisplayedString.Length; i++)
+                        s += sub;
+                    text.DisplayedString = s;
+                    hidden = true;
+                }
+            }
+            if (Status == StatusType.SELECTED)
+            {
+                if (!hidden)
+                {
+                    text.DisplayedString = typed;
+                    if (sub != "")
+                    {
+                        string s = "";
+                        for (int i = 0; i < text.DisplayedString.Length; i++)
+                            s += sub;
+                        text.DisplayedString = s;
+                    }
+                }
                 text.Color = textColor[(byte)StatusType.SELECTED];
                 if (CursorBlinking)
                 {
