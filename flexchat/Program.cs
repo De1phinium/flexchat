@@ -23,6 +23,8 @@ namespace flexchat
             set { session_key = value; }
         }
 
+        private static Network Client;
+
         static void Main()
         {
 
@@ -36,6 +38,8 @@ namespace flexchat
             wnd.MouseMoved += Win_MouseMoved;
 
             Content.Load();
+
+            Client = new Network("192.168.1.10", 8081);
 
             TextBox loginInput = new TextBox("login", 500, 50, StatusType.ACTIVE);
             loginInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
@@ -66,8 +70,6 @@ namespace flexchat
 
             byte ARmode = 0;
 
-            uint waitingfor = Content.UINT_MAX;
-
             while (wnd.IsOpen)
             {
                 wnd.DispatchEvents();
@@ -94,7 +96,7 @@ namespace flexchat
 
                     if (submitButton.Clicked())
                     {
-                        var err = Me.Authorize(ARmode, loginInput.Text(), passInput.Text());
+                        var err = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
                         submitButton.Status = StatusType.BLOCKED;
                         chgButton.Status = StatusType.BLOCKED;
                         loginInput.Status = StatusType.BLOCKED;
@@ -163,6 +165,7 @@ namespace flexchat
 
         private static void Win_Closed(object sender, EventArgs e)
         {
+            Client.Disconnect();
             wnd.Close();
         }
     }

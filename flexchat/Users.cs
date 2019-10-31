@@ -1,4 +1,6 @@
-﻿namespace flexchat
+﻿using System;
+
+namespace flexchat
 {
     class Users
     {
@@ -26,10 +28,10 @@
             this.id = id;
         }
 
-        public string Authorize(byte mode, string login, string pass)
+        public string Authorize(Network Client, byte mode, string login, string pass)
         {
-            string err = "";
-            return err;
+            Client.SendData(Convert.ToString((char)mode) + Convert.ToString((char)(login.Length)) + login + Convert.ToString((char)(login.Length)) + pass);
+            return "";
         }
 
     }
