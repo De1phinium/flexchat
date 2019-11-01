@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
-using System.IO;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 namespace flexchat
 {
@@ -17,6 +17,7 @@ namespace flexchat
 
         private TcpClient tcpClient;
         private NetworkStream netStream;
+        private StreamWriter writer;
 
         List<tRequest> requests;
         private ushort lastId = 0;
@@ -27,6 +28,7 @@ namespace flexchat
             tcpClient.Connect(host, port);
             netStream = tcpClient.GetStream();
             requests = new List<tRequest>();
+            writer = new StreamWriter(netStream);
         }
 
         public ushort SendData(string data)
@@ -36,12 +38,9 @@ namespace flexchat
             if (lastId == maxLastRequestId) lastId = 0;
             t.id = lastId;
             t.respond = null;
-            data = Convert.ToString((char)(t.id / 256)) + Convert.ToString((char)(t.id % 256)) + data;
-            requests.Add(t);
-            StreamWriter writer = new StreamWriter(netStream);
-            writer.WriteLine(data);
+            data = Convert.ToString(t.id) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
+            writer.WriteLine(data + "\n");
             writer.Flush();
-            writer.Close();
             return t.id;
         }
 
@@ -57,6 +56,7 @@ namespace flexchat
 
         public void Disconnect()
         {
+            writer.Close();
             tcpClient.Close();
         }
     }

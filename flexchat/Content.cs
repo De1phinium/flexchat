@@ -19,7 +19,7 @@ namespace flexchat
         public static Color color0;
         public static Color color1;
         public static Color color2;
-        public static Color color3; 
+        public static Color color3;
 
         private static SortedSet<char> symbols = new SortedSet<char>();
 

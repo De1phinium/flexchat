@@ -23,6 +23,8 @@ namespace flexchat
             set { session_key = value; }
         }
 
+        public static Error err;
+
         private static Network Client;
 
         static void Main()
@@ -38,6 +40,9 @@ namespace flexchat
             wnd.MouseMoved += Win_MouseMoved;
 
             Content.Load();
+
+            err = new Error(20, Color.Red);
+            err.Clear();
 
             Client = new Network("192.168.1.10", 8081);
 
@@ -76,6 +81,10 @@ namespace flexchat
 
                 wnd.Clear(Content.color0);
 
+                err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
+                err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
+                err.Draw();
+
                 if (session_key == 0)
                 {
                     loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
@@ -96,11 +105,14 @@ namespace flexchat
 
                     if (submitButton.Clicked())
                     {
-                        var err = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
-                        submitButton.Status = StatusType.BLOCKED;
-                        chgButton.Status = StatusType.BLOCKED;
-                        loginInput.Status = StatusType.BLOCKED;
-                        passInput.Status = StatusType.BLOCKED;
+                        int r_id = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
+                        if (err.code != Error.ERROR_DATA_LENGTH)
+                        {
+                            submitButton.Status = StatusType.BLOCKED;
+                            chgButton.Status = StatusType.BLOCKED;
+                            loginInput.Status = StatusType.BLOCKED;
+                            passInput.Status = StatusType.BLOCKED;
+                        }
                     }
 
                     if (chgButton.Clicked())
@@ -153,6 +165,7 @@ namespace flexchat
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
         {
+            err.Clear();
             foreach(TextBox t in textBoxes)
             {
                 t.Update(args);

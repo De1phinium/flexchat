@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Button.cs" />
     <Compile Include="Content.cs" />
+    <Compile Include="Error.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="Program.cs" />
