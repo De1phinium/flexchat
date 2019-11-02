@@ -13,7 +13,7 @@ namespace flexchat
         private Color textColor;
         public uint textSize;
 
-        public Error(uint textSize, SFML.Graphics.Color textColor)
+        public Error(uint textSize, Color textColor)
         {
             this.textSize = textSize;
             this.textColor = textColor;

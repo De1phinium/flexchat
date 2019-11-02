@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using SFML.Graphics;
 using SFML.Window;
@@ -15,10 +16,10 @@ namespace flexchat
         public static List<TextBox> textBoxes = new List<TextBox>();
         public static List<Button> buttons = new List<Button>();
 
-        private static uint session_key = 0;
+        private static Int64 session_key = 0;
         public static Users Me = new Users();
 
-        public uint SessionKey
+        public Int64 SessionKey
         {
             set { session_key = value; }
         }
@@ -27,8 +28,15 @@ namespace flexchat
 
         private static Network Client;
 
+        private static Thread nw;
+
+        public static bool Closed = false;
+
+        public static List<Network.tRequest> Resp;
+
         static void Main()
         {
+            Resp = new List<Network.tRequest>();
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -45,6 +53,8 @@ namespace flexchat
             err.Clear();
 
             Client = new Network("192.168.1.10", 8081);
+            nw = new Thread(Client.WaitForResponse);
+            nw.Start();
 
             TextBox loginInput = new TextBox("login", 500, 50, StatusType.ACTIVE);
             loginInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
@@ -73,7 +83,7 @@ namespace flexchat
             chgButton.textSize = 16;
             buttons.Add(chgButton);
 
-            byte ARmode = 0;
+            uint ARmode = 0;
 
             while (wnd.IsOpen)
             {
@@ -105,7 +115,7 @@ namespace flexchat
 
                     if (submitButton.Clicked())
                     {
-                        int r_id = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
+                        uint r_id = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
                         if (err.code != Error.ERROR_DATA_LENGTH)
                         {
                             submitButton.Status = StatusType.BLOCKED;
@@ -123,6 +133,107 @@ namespace flexchat
                         submitButton.Text = s;
                         loginInput.Clear();
                         passInput.Clear();
+                    }
+                }
+                if (Resp.Count > 0)
+                {
+                    List<Network.tRequest> toDelete = new List<Network.tRequest>();
+                    foreach (Network.tRequest r in Resp)
+                    {
+                        uint rMode = r.mode;
+                        string respond = r.respond;
+                        if (respond != null)
+                        {
+                            int p = 0;
+                            while (respond[p] != 0)
+                            {
+                                p++;
+                            }
+                            p++;
+                            string s = "";
+                            switch (rMode)
+                            {
+                                case 0:
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    if (s == "")
+                                    {
+                                        err.code = Error.ERROR_WRONG_DATA;
+                                        err.text = "WRONG LOGIN OR PASSWORD";
+                                        submitButton.Status = StatusType.ACTIVE;
+                                        chgButton.Status = StatusType.ACTIVE;
+                                        loginInput.Status = StatusType.ACTIVE;
+                                        passInput.Status = StatusType.ACTIVE;
+                                    }
+                                    else
+                                    {
+                                        Me.ID = uint.Parse(s);
+                                        Me.Login = loginInput.Text();
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        session_key = Int64.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        Me.photo_id = uint.Parse(s);
+                                    }
+                                    break;
+                                case 1:
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    if (s == "")
+                                    {
+                                        err.code = Error.ERROR_WRONG_DATA;
+                                        err.text = "LOGIN IS ALREADY USED";
+                                        submitButton.Status = StatusType.ACTIVE;
+                                        chgButton.Status = StatusType.ACTIVE;
+                                        loginInput.Status = StatusType.ACTIVE;
+                                        passInput.Status = StatusType.ACTIVE;
+                                    }
+                                    else
+                                    {
+                                        Me.ID = uint.Parse(s);
+                                        Me.Login = loginInput.Text();
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        session_key = Int64.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        Me.photo_id = uint.Parse(s);
+                                    }
+                                    break;
+                            }
+                        }
+                        toDelete.Add(r);
+                    }
+                    foreach (Network.tRequest q in toDelete)
+                    {
+                        Resp.Remove(q);
                     }
                 }
                 wnd.Display();
@@ -178,6 +289,7 @@ namespace flexchat
 
         private static void Win_Closed(object sender, EventArgs e)
         {
+            Closed = true;
             Client.Disconnect();
             wnd.Close();
         }

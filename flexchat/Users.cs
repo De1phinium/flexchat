@@ -8,15 +8,18 @@ namespace flexchat
 
         private string login;
         private uint id;
+        public uint photo_id;
         
         public string Login
         {
             get { return login;  }
+            set { login = value; }
         }
 
         public uint ID
         {
             get { return id;  }
+            set { id = value; }
         }
 
         public Users()
@@ -30,7 +33,7 @@ namespace flexchat
             this.id = id;
         }
 
-        public int Authorize(Network Client, byte mode, string login, string pass)
+        public uint Authorize(Network Client, uint mode, string login, string pass)
         {
             if (login.Length < DATA_MIN_LENGTH || pass.Length < DATA_MIN_LENGTH)
             {
@@ -39,7 +42,7 @@ namespace flexchat
                 return 0;
             }
             string data = Convert.ToString(mode) + Convert.ToString((char)0) + login + Convert.ToString((char)0) + pass;
-            return Client.SendData(data);
+            return Client.SendData(data, mode);
         }
 
     }
