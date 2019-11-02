@@ -1,15 +1,39 @@
 ﻿using System;
+using SFML.Graphics;
 
 namespace flexchat
 {
     class Users
     {
         private const uint DATA_MIN_LENGTH = 4;
+        private const uint PHOTO_SIZE = 60;
+        private const uint CH_SIZE = 24;
 
         private string login;
         private uint id;
         public uint photo_id;
-        
+
+        public uint pos_x;
+        public uint pos_y;
+
+        public void Draw()
+        {
+            CircleShape ph = new CircleShape();
+            ph.Radius = PHOTO_SIZE / 2;
+            ph.FillColor = Color.White;
+            ph.Position = new SFML.System.Vector2f(pos_x + 5, pos_y + (Program.WND_HEIGHT / 8) / 2 - (PHOTO_SIZE / 2));
+            Program.wnd.Draw(ph);
+            Text text = new Text()
+            {
+                Font = Content.font,
+                DisplayedString = login,
+                CharacterSize = CH_SIZE,
+                Color = Color.White,
+                Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 8)
+            };
+            Program.wnd.Draw(text);
+        }
+
         public string Login
         {
             get { return login;  }

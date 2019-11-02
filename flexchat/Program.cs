@@ -8,8 +8,8 @@ namespace flexchat
 {
     class Program
     {
-        static uint WND_WIDTH = 700;
-        static uint WND_HEIGHT = 500;
+        public static uint WND_WIDTH = 700;
+        public static uint WND_HEIGHT = 500;
 
         public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
 
@@ -33,10 +33,16 @@ namespace flexchat
         public static bool Closed = false;
 
         public static List<Network.tRequest> Resp;
+        private static List<Conversations> convs;
+        private static List<Users> users;
+        private static List<int> friends;
 
         static void Main()
         {
             Resp = new List<Network.tRequest>();
+            convs = new List<Conversations>();
+            users = new List<Users>();
+            friends = new List<int>();
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -83,7 +89,10 @@ namespace flexchat
             chgButton.textSize = 16;
             buttons.Add(chgButton);
 
-            uint ARmode = 0;
+            uint mode = 0;
+
+            Me.pos_x = 0;
+            Me.pos_y = 0;
 
             while (wnd.IsOpen)
             {
@@ -115,7 +124,7 @@ namespace flexchat
 
                     if (submitButton.Clicked())
                     {
-                        uint r_id = Me.Authorize(Client, ARmode, loginInput.Text(), passInput.Text());
+                        uint r_id = Me.Authorize(Client, mode, loginInput.Text(), passInput.Text());
                         if (err.code != Error.ERROR_DATA_LENGTH)
                         {
                             submitButton.Status = StatusType.BLOCKED;
@@ -127,13 +136,26 @@ namespace flexchat
 
                     if (chgButton.Clicked())
                     {
-                        ARmode = (byte)((int)1 - (int)ARmode);
+                        mode = 1 - mode;
                         string s = chgButton.Text;
                         chgButton.Text = submitButton.Text;
                         submitButton.Text = s;
                         loginInput.Clear();
                         passInput.Clear();
                     }
+                }
+                else
+                {
+                    // IF AUTHENTHICATED
+                    RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(WND_WIDTH / 4, WND_HEIGHT/ 8));
+                    bg.Position = new SFML.System.Vector2f(0, 0);
+                    bg.FillColor = Content.color0_1;
+                    wnd.Draw(bg);
+                    bg.Position = new SFML.System.Vector2f(0, WND_HEIGHT / 8);
+                    bg.Size = new SFML.System.Vector2f(bg.Size.X, wnd.Size.Y - bg.Size.Y);
+                    bg.FillColor = Content.color0_2;
+                    wnd.Draw(bg);
+                    Me.Draw();
                 }
                 if (Resp.Count > 0)
                 {
@@ -188,6 +210,10 @@ namespace flexchat
                                             p++;
                                         }
                                         Me.photo_id = uint.Parse(s);
+                                        mode = 0;
+                                        WND_WIDTH = 900;
+                                        WND_HEIGHT = 600;
+                                        wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
                                     }
                                     break;
                                 case 1:
@@ -225,6 +251,11 @@ namespace flexchat
                                             p++;
                                         }
                                         Me.photo_id = uint.Parse(s);
+                                        mode = 0;
+                                        WND_WIDTH = 900;
+                                        WND_HEIGHT = 600;
+                                        wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
+
                                     }
                                     break;
                             }
@@ -290,6 +321,7 @@ namespace flexchat
         private static void Win_Closed(object sender, EventArgs e)
         {
             Closed = true;
+            nw.Abort();
             Client.Disconnect();
             wnd.Close();
         }

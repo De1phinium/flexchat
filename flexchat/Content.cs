@@ -17,6 +17,8 @@ namespace flexchat
         public static Texture button2;
 
         public static Color color0;
+        public static Color color0_1;
+        public static Color color0_2;
         public static Color color1;
         public static Color color2;
         public static Color color3;
@@ -33,6 +35,8 @@ namespace flexchat
             font = new Font(CONTENT_DIR + "arial.ttf");
 
             color0 = new Color(44, 47, 51, 255);
+            color0_1 = new Color(36, 38, 41, 255);
+            color0_2 = new Color(24, 25, 27, 255);
             color1 = new Color(64, 68, 75, 255);
             color2 = new Color(153, 170, 181, 255);
             color3 = new Color(114, 137, 218, 255);
