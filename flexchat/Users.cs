@@ -40,15 +40,26 @@ namespace flexchat
             set { login = value; }
         }
 
+        public uint photoID
+        {
+            get { return photo_id;  }
+            set { photo_id = value; }
+        }
+
         public uint ID
         {
             get { return id;  }
             set { id = value; }
         }
 
-        public Users()
+        public Users(uint id)
         {
+            this.id = id;
+        }
 
+        public void RequestData(Network Client)
+        {
+            Client.SendData(Convert.ToString(id), 2);
         }
 
         public Users(string login, uint id)
@@ -65,7 +76,7 @@ namespace flexchat
                 Program.err.text = "Minimum length of login and password is " + Convert.ToString(DATA_MIN_LENGTH);
                 return 0;
             }
-            string data = Convert.ToString(mode) + Convert.ToString((char)0) + login + Convert.ToString((char)0) + pass;
+            string data = login + Convert.ToString((char)0) + pass;
             return Client.SendData(data, mode);
         }
 

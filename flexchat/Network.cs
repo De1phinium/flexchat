@@ -44,7 +44,12 @@ namespace flexchat
             t.respond = null;
             t.mode = mode;
             requests.Add(t);
-            data = Convert.ToString(t.id) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
+            string prefix = Convert.ToString((char)0);
+            if (Program.session_key != 0)
+            {
+                prefix = Convert.ToString((char)1) + Convert.ToString(Program.session_key) + Convert.ToString((char)0) + Convert.ToString(Program.Me.ID) + Convert.ToString((char)0);
+            }
+            data = prefix + Convert.ToString(t.id) + Convert.ToString((char)0) + Convert.ToString(mode) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
             byte[] send = Encoding.ASCII.GetBytes(data + "\n");
             netStream.Write(send, 0, send.Length);
             netStream.Flush();

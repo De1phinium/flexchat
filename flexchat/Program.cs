@@ -16,8 +16,8 @@ namespace flexchat
         public static List<TextBox> textBoxes = new List<TextBox>();
         public static List<Button> buttons = new List<Button>();
 
-        private static Int64 session_key = 0;
-        public static Users Me = new Users();
+        public static Int64 session_key = 0;
+        public static Users Me = new Users(0);
 
         public Int64 SessionKey
         {
@@ -35,14 +35,14 @@ namespace flexchat
         public static List<Network.tRequest> Resp;
         private static List<Conversations> convs;
         private static List<Users> users;
-        private static List<int> friends;
+        private static List<uint> friends;
 
         static void Main()
         {
             Resp = new List<Network.tRequest>();
             convs = new List<Conversations>();
             users = new List<Users>();
-            friends = new List<int>();
+            friends = new List<uint>();
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -100,12 +100,11 @@ namespace flexchat
 
                 wnd.Clear(Content.color0);
 
-                err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
-                err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
-                err.Draw();
-
                 if (session_key == 0)
                 {
+                    err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
+                    err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
+
                     loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
                     loginInput.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 50;
                     loginInput.Draw();
@@ -157,13 +156,17 @@ namespace flexchat
                     wnd.Draw(bg);
                     Me.Draw();
                 }
+
+                err.Draw();
+
                 if (Resp.Count > 0)
                 {
                     List<Network.tRequest> toDelete = new List<Network.tRequest>();
-                    foreach (Network.tRequest r in Resp)
+                    int loopBound = Resp.Count;
+                    for (int it = 0; it < loopBound; it++)
                     {
-                        uint rMode = r.mode;
-                        string respond = r.respond;
+                        uint rMode = Resp[it].mode;
+                        string respond = Resp[it].respond;
                         if (respond != null)
                         {
                             int p = 0;
@@ -176,46 +179,6 @@ namespace flexchat
                             switch (rMode)
                             {
                                 case 0:
-                                    while (respond[p] != 0)
-                                    {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    p++;
-                                    if (s == "")
-                                    {
-                                        err.code = Error.ERROR_WRONG_DATA;
-                                        err.text = "WRONG LOGIN OR PASSWORD";
-                                        submitButton.Status = StatusType.ACTIVE;
-                                        chgButton.Status = StatusType.ACTIVE;
-                                        loginInput.Status = StatusType.ACTIVE;
-                                        passInput.Status = StatusType.ACTIVE;
-                                    }
-                                    else
-                                    {
-                                        Me.ID = uint.Parse(s);
-                                        Me.Login = loginInput.Text();
-                                        s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        session_key = Int64.Parse(s);
-                                        s = "";
-                                        p++;
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        Me.photo_id = uint.Parse(s);
-                                        mode = 0;
-                                        WND_WIDTH = 900;
-                                        WND_HEIGHT = 600;
-                                        wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
-                                    }
-                                    break;
                                 case 1:
                                     while (respond[p] != 0)
                                     {
@@ -225,8 +188,16 @@ namespace flexchat
                                     p++;
                                     if (s == "")
                                     {
-                                        err.code = Error.ERROR_WRONG_DATA;
-                                        err.text = "LOGIN IS ALREADY USED";
+                                        if (Resp[it].mode == 0)
+                                        {
+                                            err.code = Error.ERROR_WRONG_DATA;
+                                            err.text = "LOGIN IS ALREADY USED";
+                                        }
+                                        else
+                                        {
+                                            err.code = Error.ERROR_WRONG_DATA;
+                                            err.text = "WRONG LOGIN OR PASSWORD";
+                                        }
                                         submitButton.Status = StatusType.ACTIVE;
                                         chgButton.Status = StatusType.ACTIVE;
                                         loginInput.Status = StatusType.ACTIVE;
@@ -250,17 +221,136 @@ namespace flexchat
                                             s += respond[p];
                                             p++;
                                         }
+                                        p++;
                                         Me.photo_id = uint.Parse(s);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        int len = int.Parse(s);
+                                        for (int i = 0; i < len; i++)
+                                        {
+                                            s = "";
+                                            while (respond[p] != 0)
+                                            {
+                                                s += respond[p];
+                                                p++;
+                                            }
+                                            p++;
+                                            Conversations t = new Conversations(uint.Parse(s));
+                                            convs.Add(t);
+                                            t.RequestData(Client);
+                                        }
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        len = int.Parse(s);
+                                        p++;
+                                        for (int i = 0; i < len; i++)
+                                        {
+                                            s = "";
+                                            while (respond[p] != 0)
+                                            {
+                                                s += respond[p];
+                                                p++;
+                                            }
+                                            p++;
+                                            Users u = new Users(uint.Parse(s));
+                                            users.Add(u);
+                                            friends.Add(uint.Parse(s));
+                                            u.RequestData(Client);
+                                        }
                                         mode = 0;
                                         WND_WIDTH = 900;
                                         WND_HEIGHT = 600;
                                         wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
-
+                                    }
+                                    break;
+                                case 2:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    uint id = uint.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    string login = s;
+                                    p++;
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    uint photo_id = uint.Parse(s);
+                                    for (int u = 0; u < users.Count; u++)
+                                    {
+                                        if (users[u].ID == id)
+                                        {
+                                            users[u].Login = login;
+                                            users[u].photoID = photo_id;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case 3:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    uint conv_id = uint.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    uint cr_id = uint.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    uint ph_id = uint.Parse(s);
+                                    p++;
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    for (int c = 0; c < convs.Count; c++)
+                                    {
+                                        if (convs[c].id == conv_id)
+                                        {
+                                            convs[c].creator_id = cr_id;
+                                            convs[c].photo_id = ph_id;
+                                            convs[c].title = s;
+                                            break;
+                                        }
                                     }
                                     break;
                             }
                         }
-                        toDelete.Add(r);
+                        toDelete.Add(Resp[it]);
                     }
                     foreach (Network.tRequest q in toDelete)
                     {
