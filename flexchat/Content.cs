@@ -15,6 +15,10 @@ namespace flexchat
         public static Texture button0;
         public static Texture button1;
         public static Texture button2;
+        public static Texture Chats0;
+        public static Texture Chats1;
+        public static Texture Friends0;
+        public static Texture Friends1;
 
         public static Color color0;
         public static Color color0_1;
@@ -31,6 +35,10 @@ namespace flexchat
             button0 = new Texture(CONTENT_DIR + "button0.png");
             button1 = new Texture(CONTENT_DIR + "button1.png");
             button2 = new Texture(CONTENT_DIR + "button2.png");
+            Chats0 = new Texture(CONTENT_DIR + "Chats0.png");
+            Chats1 = new Texture(CONTENT_DIR + "Chats1.png");
+            Friends0 = new Texture(CONTENT_DIR + "Friends0.png");
+            Friends1 = new Texture(CONTENT_DIR + "Friends1.png");
 
             font = new Font(CONTENT_DIR + "arial.ttf");
 

@@ -12,6 +12,8 @@ namespace flexchat
         private bool CursorBlinking;
         private string cursor;
         private string sub;
+        public bool symbolsAllowed;
+        public bool spaceBarAllowed;
 
         public uint textLengthBound = 255;
 
@@ -21,6 +23,8 @@ namespace flexchat
 
         public TextBox(string s, uint size_x, uint size_y, StatusType status)
         {
+            symbolsAllowed = false;
+            spaceBarAllowed = true;
             sizeX = size_x;
             sizeY = size_y;
             posX = pos_x;
@@ -61,16 +65,17 @@ namespace flexchat
         {
             if (Status == StatusType.SELECTED)
             {
-                if (e.Unicode[0] == '\b' && typed.Length > 0) // If it is a backspace
+                if (e.Unicode[0] == '\b') // If it is a backspace
                 {
-                    typed = typed.Substring(0, typed.Length - 1);
+                    if (typed.Length > 0) typed = typed.Substring(0, typed.Length - 1);
                     return;
                 }
-                if (!Content.TextChar(e.Unicode[0]))
-                    return;
-                if (typed.Length < textLengthBound)
+                if ((Content.IsSymbol(e.Unicode[0]) && symbolsAllowed) || (e.Unicode[0] == ' ' && spaceBarAllowed) || Content.TextChar(e.Unicode[0]))
                 {
-                    typed += e.Unicode;
+                    if (typed.Length < textLengthBound)
+                    {
+                        typed += e.Unicode;
+                    }
                 }
             }
         }

@@ -9,15 +9,39 @@ namespace flexchat
         private const uint PHOTO_SIZE = 60;
         private const uint CH_SIZE = 24;
 
+        public uint photo_size 
+        {
+            get { return PHOTO_SIZE;  }
+        }
+
         private string login;
         private uint id;
         public uint photo_id;
+        private StatusType prev_status;
+        public StatusType status;
 
         public uint pos_x;
         public uint pos_y;
 
         public void Draw()
         {
+            if (pos_y + PHOTO_SIZE <= 5 || pos_y >= Program.wnd.Size.Y - 5)
+                return;
+            RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.WND_WIDTH / 4, PHOTO_SIZE + 10));
+            rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
+            if (status == StatusType.ACTIVE)
+            {
+                rect.FillColor = Content.color0_2;
+            }
+            else if (status == StatusType.SELECTED)
+            {
+                rect.FillColor = Content.color3;
+            }
+            else
+            {
+                rect.FillColor = Content.color0;
+            }
+            Program.wnd.Draw(rect);
             CircleShape ph = new CircleShape();
             ph.Radius = PHOTO_SIZE / 2;
             ph.FillColor = Color.White;
@@ -28,9 +52,21 @@ namespace flexchat
                 Font = Content.font,
                 DisplayedString = login,
                 CharacterSize = CH_SIZE,
-                Color = Color.White,
-                Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 8)
+                Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 3 + PHOTO_SIZE / 2 - CH_SIZE / 2)
             };
+
+            if (status == StatusType.ACTIVE)
+            {
+                text.Color = Color.White;
+            }
+            else if (status == StatusType.SELECTED)
+            {
+                text.Color = Content.color0_2;
+            }
+            else
+            {
+                text.Color = Content.color2;
+            }
             Program.wnd.Draw(text);
         }
 
@@ -55,6 +91,7 @@ namespace flexchat
         public Users(uint id)
         {
             this.id = id;
+            status = StatusType.ACTIVE;
         }
 
         public void RequestData(Network Client)
@@ -66,6 +103,7 @@ namespace flexchat
         {
             this.login = login;
             this.id = id;
+            status = StatusType.ACTIVE;
         }
 
         public uint Authorize(Network Client, uint mode, string login, string pass)
@@ -80,5 +118,34 @@ namespace flexchat
             return Client.SendData(data, mode);
         }
 
+        public void Update(SFML.Window.MouseMoveEventArgs e)
+        {
+            if (status == StatusType.BLOCKED)
+                return;
+            if (e.X >= pos_x && e.X <= pos_x + Program.WND_WIDTH / 4 && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10)
+            {
+                if (status != StatusType.SELECTED)
+                    prev_status = status;
+                status = StatusType.SELECTED;
+            }
+            else
+            {
+                status = prev_status;
+            }
+        }
+
+        public void Update(SFML.Window.MouseButtonEventArgs e)
+        {
+            if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
+            {
+                prev_status = StatusType.BLOCKED;
+                status = prev_status;
+            }
+            else
+            {
+                prev_status = StatusType.ACTIVE;
+                status = prev_status;
+            }
+        }
     }
 }

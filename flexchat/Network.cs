@@ -27,12 +27,19 @@ namespace flexchat
 
         public Network(string host, int port)
         {
-            tcpClient = new TcpClient();
-            tcpClient.Connect(host, port);
-            netStream = tcpClient.GetStream();
-            requests = new List<tRequest>();
-            writer = new BinaryWriter(netStream, Encoding.ASCII, true);
-            reader = new BinaryReader(netStream, Encoding.ASCII, true);
+            try
+            {
+                tcpClient = new TcpClient();
+                tcpClient.Connect(host, port);
+                netStream = tcpClient.GetStream();
+                requests = new List<tRequest>();
+                writer = new BinaryWriter(netStream, Encoding.ASCII, true);
+                reader = new BinaryReader(netStream, Encoding.ASCII, true);
+            }
+            catch (Exception)
+            {
+                Environment.Exit(0);
+            }
         }
 
         public uint SendData(string data, uint mode)
@@ -65,7 +72,7 @@ namespace flexchat
         public void WaitForResponse()
         {
             string data;
-            while (!Program.Closed)
+            while (true)
             {
                 data = "";
                 try

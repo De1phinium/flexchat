@@ -30,12 +30,12 @@ namespace flexchat
 
         private static Thread nw;
 
-        public static bool Closed = false;
-
         public static List<Network.tRequest> Resp;
-        private static List<Conversations> convs;
-        private static List<Users> users;
-        private static List<uint> friends;
+        public static List<Conversations> convs;
+        public static List<Users> users;
+        public static List<uint> friends;
+
+        private static uint mode;
 
         static void Main()
         {
@@ -67,6 +67,7 @@ namespace flexchat
             loginInput.SetCursor(40, true, "|");
             loginInput.SetTextColor(Content.color2, Color.White, Content.color0);
             loginInput.textLengthBound = 24;
+            loginInput.spaceBarAllowed = false;
             textBoxes.Add(loginInput);
 
             TextBox passInput = new TextBox("password", 500, 50, StatusType.ACTIVE);
@@ -75,7 +76,16 @@ namespace flexchat
             passInput.SetTextColor(Content.color2, Color.White, Content.color0);
             passInput.textLengthBound = 24;
             passInput.SetSub("*");
+            passInput.spaceBarAllowed = false;
             textBoxes.Add(passInput);
+
+            TextBox typeMsg = new TextBox("Type your message", 500, 50, StatusType.ACTIVE);
+            typeMsg.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
+            typeMsg.SetCursor(30, true, "|");
+            typeMsg.SetTextColor(Content.color2, Color.White, Content.color0);
+            typeMsg.textLengthBound = 512;
+            typeMsg.SetSub("");
+            typeMsg.symbolsAllowed = true;
 
             Button submitButton = new Button("Sign in", 140, 60, StatusType.ACTIVE);
             submitButton.LoadTextures(Content.button0, Content.button1, Content.button2);
@@ -89,7 +99,10 @@ namespace flexchat
             chgButton.textSize = 16;
             buttons.Add(chgButton);
 
-            uint mode = 0;
+            Button chatsButton = new Button("", 112, 30, StatusType.ACTIVE);
+            Button friendsButton = new Button("", 113, 30, StatusType.ACTIVE);
+
+            mode = 0;
 
             Me.pos_x = 0;
             Me.pos_y = 0;
@@ -146,15 +159,77 @@ namespace flexchat
                 else
                 {
                     // IF AUTHENTHICATED
-                    RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(WND_WIDTH / 4, WND_HEIGHT/ 8));
+                    RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(WND_WIDTH / 4, wnd.Size.Y - WND_HEIGHT / 8));
+                    bg.Position = new SFML.System.Vector2f(0, WND_HEIGHT / 8);
+                    bg.FillColor = Content.color0_2;
+                    wnd.Draw(bg);
+                    uint posx = 0;
+                    uint posy = WND_HEIGHT / 8 + chatsButton.sizeY;
+                    if (mode == 0)
+                    {
+                        foreach (Conversations c in convs)
+                        {
+                            c.pos_x = posx;
+                            c.pos_y = posy;
+                            posy += c.photo_size + 10;
+                            c.Draw();
+                        }
+                    }
+                    else
+                    {
+                        foreach (Users u in users)
+                        {
+                            u.pos_x = posx;
+                            u.pos_y = posy;
+                            posy += u.photo_size + 10;
+                            u.Draw();
+                        }
+                    }
+                    bg.Size = new SFML.System.Vector2f(WND_WIDTH / 4, WND_HEIGHT / 8);
                     bg.Position = new SFML.System.Vector2f(0, 0);
                     bg.FillColor = Content.color0_1;
                     wnd.Draw(bg);
-                    bg.Position = new SFML.System.Vector2f(0, WND_HEIGHT / 8);
-                    bg.Size = new SFML.System.Vector2f(bg.Size.X, wnd.Size.Y - bg.Size.Y);
-                    bg.FillColor = Content.color0_2;
-                    wnd.Draw(bg);
+                    if (chatsButton.Clicked())
+                    {
+                        mode = 0;
+                        chatsButton.Status = StatusType.BLOCKED;
+                        friendsButton.Status = StatusType.ACTIVE;
+                    }
+                    if (friendsButton.Clicked())
+                    {
+                        mode = 1;
+                        friendsButton.Status = StatusType.BLOCKED;
+                        chatsButton.Status = StatusType.ACTIVE;
+                    }
+                    chatsButton.posX = 0;
+                    chatsButton.posY = WND_HEIGHT / 8;
+                    chatsButton.Draw();
+                    friendsButton.posX = chatsButton.sizeX;
+                    friendsButton.posY = WND_HEIGHT / 8;
+                    friendsButton.Draw();
                     Me.Draw();
+
+                    if (mode == 0)
+                    {
+                        foreach (Conversations c in convs)
+                        {
+                            if (c.status == StatusType.BLOCKED)
+                            {
+                                c.DrawMessages();
+
+                                typeMsg.posX = WND_WIDTH / 4 + 10;
+                                typeMsg.sizeX = wnd.Size.X - WND_WIDTH / 4 - 20;
+                                typeMsg.posY = wnd.Size.Y - typeMsg.sizeY - 10;
+                                typeMsg.Draw();
+
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                    }
                 }
 
                 err.Draw();
@@ -180,6 +255,7 @@ namespace flexchat
                             {
                                 case 0:
                                 case 1:
+                                    textBoxes.Add(typeMsg);
                                     while (respond[p] != 0)
                                     {
                                         s += respond[p];
@@ -188,7 +264,7 @@ namespace flexchat
                                     p++;
                                     if (s == "")
                                     {
-                                        if (Resp[it].mode == 0)
+                                        if (Resp[it].mode == 1)
                                         {
                                             err.code = Error.ERROR_WRONG_DATA;
                                             err.text = "LOGIN IS ALREADY USED";
@@ -240,7 +316,7 @@ namespace flexchat
                                                 p++;
                                             }
                                             p++;
-                                            Conversations t = new Conversations(uint.Parse(s));
+                                            Conversations t = new Conversations(int.Parse(s));
                                             convs.Add(t);
                                             t.RequestData(Client);
                                         }
@@ -270,6 +346,15 @@ namespace flexchat
                                         WND_WIDTH = 900;
                                         WND_HEIGHT = 600;
                                         wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
+                                        chatsButton.Status = StatusType.BLOCKED;
+                                        chatsButton.LoadTextures(Content.Chats1, Content.Chats1, Content.Chats0);
+                                        chatsButton.SetTextColor(Color.White, Color.White, Color.White);
+                                        chatsButton.textSize = 0;
+                                        buttons.Add(chatsButton);
+                                        friendsButton.LoadTextures(Content.Friends1, Content.Friends1, Content.Friends0);
+                                        friendsButton.SetTextColor(Color.White, Color.White, Color.White);
+                                        friendsButton.textSize = 0;
+                                        buttons.Add(friendsButton);
                                     }
                                     break;
                                 case 2:
@@ -322,14 +407,14 @@ namespace flexchat
                                         p++;
                                     }
                                     p++;
-                                    uint cr_id = uint.Parse(s);
+                                    int cr_id = int.Parse(s);
                                     s = "";
                                     while (respond[p] != 0)
                                     {
                                         s += respond[p];
                                         p++;
                                     }
-                                    uint ph_id = uint.Parse(s);
+                                    int ph_id = int.Parse(s);
                                     p++;
                                     s = "";
                                     while (respond[p] != 0)
@@ -344,7 +429,61 @@ namespace flexchat
                                             convs[c].creator_id = cr_id;
                                             convs[c].photo_id = ph_id;
                                             convs[c].title = s;
+                                            convs[c].AskForMessages(Client);
                                             break;
+                                        }
+                                    }
+                                    break;
+                                case 4:
+                                    while (p < respond.Length)
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int m_id = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int sender_id = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int convID = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        string msgtext = s;
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        foreach (Conversations c in convs)
+                                        {
+                                            if (c.id == convID)
+                                            {
+                                                c.AddMessage(m_id, sender_id, convID, msgtext, msgSent);
+                                                break;
+                                            }
                                         }
                                     }
                                     break;
@@ -365,8 +504,8 @@ namespace flexchat
         {
             if (e.Width < WND_WIDTH)
             {
-                wnd.Size = new SFML.System.Vector2u(WND_WIDTH, e.Height);
-                e.Width = WND_WIDTH;
+                //wnd.Size = new SFML.System.Vector2u(WND_WIDTH, e.Height);
+                //e.Width = WND_WIDTH;
             }
             if (e.Height < WND_HEIGHT)
             {
@@ -393,6 +532,14 @@ namespace flexchat
             {
                 b.Update(args);
             }
+            foreach (Conversations c in convs)
+            {
+                c.Update(args);
+            }
+            foreach(Users u in users)
+            {
+                u.Update(args);
+            }
         }
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
@@ -406,14 +553,31 @@ namespace flexchat
             {
                 b.Update(args);
             }
+            if (args.X <= WND_WIDTH / 4)
+            {
+                if (mode == 0)
+                {
+                    foreach (Conversations c in convs)
+                    {
+                        c.Update(args);
+                    }
+                }
+                else
+                {
+                    foreach(Users u in users)
+                    {
+                        u.Update(args);
+                    }
+                }
+            }
         }
 
         private static void Win_Closed(object sender, EventArgs e)
         {
-            Closed = true;
             nw.Abort();
             Client.Disconnect();
             wnd.Close();
+            Environment.Exit(0);
         }
     }
 }
