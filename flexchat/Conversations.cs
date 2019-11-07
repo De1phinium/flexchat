@@ -27,16 +27,13 @@ namespace flexchat
         {
             int posx = Convert.ToInt32(Program.WND_WIDTH / 4);
             int posy = Convert.ToInt32(Program.wnd.Size.Y - 68);
+            int i = 0;
             foreach (Message m in messages)
             {
-                int pp = posy;
-                posy -= m.Draw(posx, posy) + 3;
-                RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(100, 2));
-                rect.FillColor = Color.Red;
-                rect.Position = new SFML.System.Vector2f(posx, pp);
-                Program.wnd.Draw(rect);
-                rect.Position = new SFML.System.Vector2f(posx, posy);
-                Program.wnd.Draw(rect);
+                if (posy < 3)
+                    break;
+                i++;
+                posy -= m.Draw(posx, posy) + 3 + 5 * i;
             }
         }
 
@@ -63,24 +60,34 @@ namespace flexchat
         public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
             Message msg = new Message(id, sender_id, conv_id, text, sent);
-            messages.Add(msg);
+            if (messages.Count == 0)
+                messages.Add(msg);
+            else
+            {
+                if (msg.sent < messages[messages.Count - 1].sent)
+                {
+                    messages.Add(msg);
+                }
+                else
+                {
+                    messages.Insert(0, msg);
+                }
+            }
         }
 
         public void Draw()
         {
             RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.WND_WIDTH / 4, PHOTO_SIZE + 10));
             rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
+            rect.FillColor = Color.Red;
             if (status == StatusType.ACTIVE)
             {
-                rect.FillColor = Content.color0_2;
             }
             else if (status == StatusType.SELECTED)
             {
-                rect.FillColor = Content.color3;
             }
             else
             {
-                rect.FillColor = Content.color0;
             }
             Program.wnd.Draw(rect);
             if (pos_y + PHOTO_SIZE <= 5 || pos_y >= Program.wnd.Size.Y - 5)
@@ -103,11 +110,11 @@ namespace flexchat
             }
             else if (status == StatusType.SELECTED)
             {
-                text.Color = Content.color0_2;
+                text.Color = Color.Red;
             }
             else
             {
-                text.Color = Content.color2;
+                text.Color = Color.Red;
             }
             Program.wnd.Draw(text);
             if (messages.Count > 0)
@@ -119,18 +126,7 @@ namespace flexchat
                     if (text.DisplayedString.Length < k) k = text.DisplayedString.Length;
                     text.DisplayedString = text.DisplayedString.Substring(0, k) + "...";
                 }
-                if (status == StatusType.ACTIVE)
-                {
-                    text.Color = Content.color2;
-                }
-                else if (status == StatusType.SELECTED)
-                {
-                    text.Color = Content.color0_1;
-                }
-                else
-                {
-                    text.Color = Content.color2;
-                }
+                text.Color = Color.Red;
                 text.CharacterSize = TEXT_SIZE;
                 text.Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 13 + TITLE_SIZE);
             }

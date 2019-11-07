@@ -16,7 +16,7 @@ namespace flexchat
         protected uint size_y;
         protected StatusType status;
 
-        protected Texture[] textures;
+        public Texture[] textures;
 
         public StatusType Status
         {

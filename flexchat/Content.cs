@@ -1,6 +1,6 @@
 ﻿using SFML.Graphics;
 using System.Collections.Generic;
-using SFML.Window;
+using System;
 
 namespace flexchat
 {
@@ -11,44 +11,59 @@ namespace flexchat
 
         public static Font font;
 
-        public static Texture textbox0;
-        public static Texture button0;
-        public static Texture button1;
-        public static Texture button2;
-        public static Texture Chats0;
-        public static Texture Chats1;
-        public static Texture Friends0;
-        public static Texture Friends1;
-
-        public static Color color0;
-        public static Color color0_1;
-        public static Color color0_2;
-        public static Color color1;
-        public static Color color2;
-        public static Color color3;
+        public static Texture Background;
+        public static Texture LoginTextbox;
+        public static Texture PassTextbox;
+        public static Texture[,] submitbutton = new Texture[2,2];
+        public static Texture[] chg = new Texture[2];
+        public static Texture panel;
+        public static Texture exitButton;
+        public static Texture exitButtonSelected;
+        public static Texture settings;
+        public static Texture settingssel;
 
         private static SortedSet<char> symbols = new SortedSet<char>();
 
         public static void Load()
         {
-            textbox0 = new Texture(CONTENT_DIR + "textbar0.png");
-            button0 = new Texture(CONTENT_DIR + "button0.png");
-            button1 = new Texture(CONTENT_DIR + "button1.png");
-            button2 = new Texture(CONTENT_DIR + "button2.png");
-            Chats0 = new Texture(CONTENT_DIR + "Chats0.png");
-            Chats1 = new Texture(CONTENT_DIR + "Chats1.png");
-            Friends0 = new Texture(CONTENT_DIR + "Friends0.png");
-            Friends1 = new Texture(CONTENT_DIR + "Friends1.png");
+            try
+            {
+                Background = new Texture(CONTENT_DIR + "background.png");
+                LoginTextbox = new Texture(CONTENT_DIR + "logininp.png");
+                PassTextbox = new Texture(CONTENT_DIR + "passinp.png");
+                submitbutton[0,0] = new Texture(CONTENT_DIR + "signinbutton.png");
+                submitbutton[1,0] = new Texture(CONTENT_DIR + "signupbutton.png");
+                submitbutton[0,1] = new Texture(CONTENT_DIR + "signinbuttonsel.png");
+                submitbutton[1,1] = new Texture(CONTENT_DIR + "signupbuttonsel.png");
+                chg[0] = new Texture(CONTENT_DIR + "chgsignup.png");
+                chg[1] = new Texture(CONTENT_DIR + "chgsignin.png");
+                panel = new Texture(CONTENT_DIR + "panel.png");
+                exitButton = new Texture(CONTENT_DIR + "exitButton.png");
+                exitButtonSelected = new Texture(CONTENT_DIR + "exitButtonSelected.png");
+                settings = new Texture(CONTENT_DIR + "settings.png");
+                settingssel = new Texture(CONTENT_DIR + "settingssel.png");
 
-            font = new Font(CONTENT_DIR + "arial.ttf");
+                Background.Smooth = true;
+                LoginTextbox.Smooth = true;
+                PassTextbox.Smooth = true;
+                submitbutton[0,0].Smooth = true;
+                submitbutton[1,0].Smooth = true;
+                submitbutton[0,1].Smooth = true;
+                submitbutton[1,1].Smooth = true;
+                chg[0].Smooth = true;
+                chg[1].Smooth = true;
+                panel.Smooth = true;
+                exitButton.Smooth = true;
+                exitButtonSelected.Smooth = true;
+                settings.Smooth = true;
+                settingssel.Smooth = true;
 
-            color0 = new Color(44, 47, 51, 255);
-            color0_1 = new Color(36, 38, 41, 255);
-            color0_2 = new Color(24, 25, 27, 255);
-            color1 = new Color(64, 68, 75, 255);
-            color2 = new Color(153, 170, 181, 255);
-            color3 = new Color(114, 137, 218, 255);
-
+                font = new Font(CONTENT_DIR + "tahoma.ttf");
+            }
+            catch (Exception)
+            {
+                Environment.Exit(1337);
+            }
             symbols.Add('+');
             symbols.Add('=');
             symbols.Add('-');

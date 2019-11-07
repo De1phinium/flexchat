@@ -19,7 +19,7 @@ namespace flexchat
             const int TitleSize = 18;
             string text = this.text;
             int offset = 0;
-            int maxslen = Convert.ToInt32(Program.wnd.Size.X - (Program.WND_WIDTH / 4) - 10) / CharSize;
+            int maxslen = Convert.ToInt32(Program.wnd.Size.X - (Program.WND_WIDTH / 4) - 10) / ((3*CharSize) / 5);
             Text Dtext = new Text()
             {
                 Font = Content.font,
@@ -28,62 +28,53 @@ namespace flexchat
             };
             string[] disp = new string[24];
             int p = 0, nDisp = 0;
-            while (text.Length - p > maxslen)
+            while (p + maxslen < text.Length)
             {
-                if (p + maxslen > text.Length)
-                    disp[nDisp] = text.Substring(p, text.Length - p);
-                else
-                    disp[nDisp] = text.Substring(p, maxslen);
-                p += maxslen;
+                disp[nDisp] = text.Substring(p, maxslen);
                 nDisp++;
+                p += maxslen;
             }
-            if (text.Substring(p, text.Length - p) != "")
+            if (p < text.Length - 1)
             {
                 disp[nDisp] = text.Substring(p, text.Length - p);
+                nDisp++;
             }
-            offset += nDisp * CharSize;
-            for (int i = 1; i <= nDisp; i++)
+            for (int i = nDisp; i > 0; i--)
             {
-                RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X, 2));
-                rect.FillColor = Color.Blue;
-                rect.Position = new SFML.System.Vector2f(0, posy - CharSize * i);
-                Program.wnd.Draw(rect);
-                Dtext.Position = new SFML.System.Vector2f(posx + 15, posy - CharSize * i);
+                offset += CharSize;
+                Dtext.Position = new SFML.System.Vector2f(posx + 18, posy - 5 - offset);
                 Dtext.DisplayedString = disp[i - 1];
                 Program.wnd.Draw(Dtext);
             }
-            Dtext.DisplayedString = "";
-            CircleShape circ = new CircleShape();
-            circ.Radius = (PH_SIZE - 5) / 2;
-            circ.FillColor = Color.White;
-            foreach (Users u in Program.users)
-            {
-                if (u.ID == sender_id)
-                {
-                    Dtext.DisplayedString = u.Login;
-                    break;
-                }
-            }
+            offset += PH_SIZE;
+            CircleShape ph = new CircleShape();
+            ph.FillColor = Color.White;
+            ph.Radius = (PH_SIZE - 10) / 2;
+            ph.Position = new SFML.System.Vector2f(posx + 10, posy - offset);
+            Program.wnd.Draw(ph);
             if (Program.Me.ID == sender_id)
             {
                 Dtext.DisplayedString = Program.Me.Login;
             }
-            offset += PH_SIZE;
+            else
+            {
+                foreach (Users u in Program.users)
+                {
+                    if (u.ID == sender_id)
+                    {
+                        Dtext.DisplayedString = u.Login;
+                        break;
+                    }
+                }
+            }
             Dtext.CharacterSize = TitleSize;
-            Dtext.Color = Color.White;
-            Dtext.Position = new SFML.System.Vector2f(posx + PH_SIZE + 10, posy - offset + 5);
+            Dtext.Position = new SFML.System.Vector2f(posx + 7 + PH_SIZE, posy - offset);
             Program.wnd.Draw(Dtext);
-            RectangleShape rect2= new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X, 2));
-            rect2.FillColor = Color.Green;
-            rect2.Position = new SFML.System.Vector2f(0, posy - offset);
-            Program.wnd.Draw(rect2);
-            Dtext.CharacterSize = CharSize;
+            Dtext.CharacterSize = CharSize - 2;
+            Dtext.Color = Color.Red; ;
             Dtext.DisplayedString = sent.ToString();
-            Dtext.Position = new SFML.System.Vector2f(posx + PH_SIZE + 10, posy - offset + TitleSize + 4);
-            Dtext.Color = Content.color2;
+            Dtext.Position = new SFML.System.Vector2f(posx + 10 + PH_SIZE, posy - offset + TitleSize + 2);
             Program.wnd.Draw(Dtext);
-            circ.Position = new SFML.System.Vector2f(posx + 10, posy - offset + 4);
-            Program.wnd.Draw(circ);
             return offset;
         }
         public Message(int id, int sender_id, int conv_id, string text, DateTime sent)

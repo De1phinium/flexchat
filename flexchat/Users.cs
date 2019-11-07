@@ -29,17 +29,15 @@ namespace flexchat
                 return;
             RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.WND_WIDTH / 4, PHOTO_SIZE + 10));
             rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
+            rect.FillColor = Color.Red;
             if (status == StatusType.ACTIVE)
             {
-                rect.FillColor = Content.color0_2;
             }
             else if (status == StatusType.SELECTED)
             {
-                rect.FillColor = Content.color3;
             }
             else
             {
-                rect.FillColor = Content.color0;
             }
             Program.wnd.Draw(rect);
             CircleShape ph = new CircleShape();
@@ -54,19 +52,7 @@ namespace flexchat
                 CharacterSize = CH_SIZE,
                 Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 3 + PHOTO_SIZE / 2 - CH_SIZE / 2)
             };
-
-            if (status == StatusType.ACTIVE)
-            {
-                text.Color = Color.White;
-            }
-            else if (status == StatusType.SELECTED)
-            {
-                text.Color = Content.color0_2;
-            }
-            else
-            {
-                text.Color = Content.color2;
-            }
+            text.Color = Color.White;
             Program.wnd.Draw(text);
         }
 

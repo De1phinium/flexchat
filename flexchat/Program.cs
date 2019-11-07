@@ -8,10 +8,10 @@ namespace flexchat
 {
     class Program
     {
-        public static uint WND_WIDTH = 700;
+        public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
 
-        public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
+        public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), null);
 
         public static List<TextBox> textBoxes = new List<TextBox>();
         public static List<Button> buttons = new List<Button>();
@@ -37,6 +37,8 @@ namespace flexchat
 
         private static uint mode;
 
+        private static Panel panel;
+
         static void Main()
         {
             Resp = new List<Network.tRequest>();
@@ -55,6 +57,18 @@ namespace flexchat
 
             Content.Load();
 
+            panel = new Panel(Content.panel, 19, Content.exitButton, Content.exitButtonSelected, 34);
+            panel.exitButton.Function += Win_Closed;
+
+            Panel.MenuElement menu;
+            menu.Function = null;
+            menu.selected = false;
+            menu.sizeX = 49;
+            menu.texture = Content.settings;
+            menu.textureSelected = Content.settingssel;
+            menu.submenu = null;
+            Panel.menu.Add(menu);
+
             err = new Error(20, Color.Red);
             err.Clear();
 
@@ -62,45 +76,41 @@ namespace flexchat
             nw = new Thread(Client.WaitForResponse);
             nw.Start();
 
-            TextBox loginInput = new TextBox("login", 500, 50, StatusType.ACTIVE);
-            loginInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
-            loginInput.SetCursor(40, true, "|");
-            loginInput.SetTextColor(Content.color2, Color.White, Content.color0);
-            loginInput.textLengthBound = 24;
-            loginInput.spaceBarAllowed = false;
+            TextBox loginInput = new TextBox(441, 66, 40, Content.LoginTextbox, Content.LoginTextbox, 65, new Color(80, 72, 153, 255));
+            loginInput.textLengthBound = 18;
+            loginInput.SpacebarAllowed = false;
+            loginInput.symbolsAllowed = false;
+            loginInput.defaultString = "login";
             textBoxes.Add(loginInput);
 
-            TextBox passInput = new TextBox("password", 500, 50, StatusType.ACTIVE);
-            passInput.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
-            passInput.SetCursor(40, true, "|");
-            passInput.SetTextColor(Content.color2, Color.White, Content.color0);
-            passInput.textLengthBound = 24;
-            passInput.SetSub("*");
-            passInput.spaceBarAllowed = false;
+            TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, new Color(80, 72, 153, 255));
+            passInput.textLengthBound = 18;
+            passInput.SpacebarAllowed = false;
+            passInput.symbolsAllowed = false;
+            passInput.defaultString = "password";
+            passInput.sub = "*";
             textBoxes.Add(passInput);
 
-            TextBox typeMsg = new TextBox("Type your message", 500, 50, StatusType.ACTIVE);
-            typeMsg.LoadTextures(Content.textbox0, Content.textbox0, Content.textbox0);
-            typeMsg.SetCursor(30, true, "|");
-            typeMsg.SetTextColor(Content.color2, Color.White, Content.color0);
-            typeMsg.textLengthBound = 512;
-            typeMsg.SetSub("");
+            TextBox typeMsg = new TextBox(441, 66, 16, Content.LoginTextbox, Content.LoginTextbox, 20, new Color(80, 72, 153, 255));
             typeMsg.symbolsAllowed = true;
 
-            Button submitButton = new Button("Sign in", 140, 60, StatusType.ACTIVE);
-            submitButton.LoadTextures(Content.button0, Content.button1, Content.button2);
-            submitButton.SetTextColor(Color.White, Content.color3, Content.color1);
+            Button submitButton = new Button("", 207, 50, StatusType.ACTIVE);
+            submitButton.SetTextColor(Color.White, new Color(54, 38, 84, 255), Color.White);
+            submitButton.LoadTextures(Content.submitbutton[0,0], Content.submitbutton[0,1], Content.submitbutton[0,0]);
             submitButton.textSize = 30;
             buttons.Add(submitButton);
 
-            Button chgButton = new Button("Sign up", 80, 12, StatusType.ACTIVE);
-            chgButton.LoadTextures(null, null, null);
-            chgButton.SetTextColor(Content.color3, Color.White, Content.color1);
+            Button chgButton = new Button("", 60, 21, StatusType.ACTIVE);
             chgButton.textSize = 16;
+            chgButton.LoadTextures(Content.chg[0], Content.chg[0], Content.chg[0]);
             buttons.Add(chgButton);
 
             Button chatsButton = new Button("", 112, 30, StatusType.ACTIVE);
             Button friendsButton = new Button("", 113, 30, StatusType.ACTIVE);
+
+            RectangleShape Background = new RectangleShape(new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y));
+            Background.Texture = Content.Background;
+            Background.Position = new SFML.System.Vector2f(0, 0);
 
             mode = 0;
 
@@ -111,9 +121,10 @@ namespace flexchat
             {
                 wnd.DispatchEvents();
 
-                wnd.Clear(Content.color0);
+                Background.Size = new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y);
+                wnd.Draw(Background);
 
-                if (session_key == 0)
+                if (true)
                 {
                     err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
                     err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
@@ -127,16 +138,16 @@ namespace flexchat
                     passInput.Draw();
 
                     submitButton.posX = (wnd.Size.X / 2) - (submitButton.sizeX / 2);
-                    submitButton.posY = (wnd.Size.Y / 2) + 50;
+                    submitButton.posY = (wnd.Size.Y / 2) + 100;
                     submitButton.Draw();
 
-                    chgButton.posX = (wnd.Size.X / 2) + (passInput.sizeX / 2) - (chgButton.sizeX);
-                    chgButton.posY = (wnd.Size.Y / 2) + passInput.sizeY / 2 + 5;
+                    chgButton.posX = (wnd.Size.X / 2) + (passInput.sizeX / 2) - (chgButton.sizeX) - 32;
+                    chgButton.posY = (wnd.Size.Y / 2) + passInput.sizeY / 2 + 7;
                     chgButton.Draw();
 
                     if (submitButton.Clicked())
                     {
-                        uint r_id = Me.Authorize(Client, mode, loginInput.Text(), passInput.Text());
+                        uint r_id = Me.Authorize(Client, mode, loginInput.typed, passInput.typed);
                         if (err.code != Error.ERROR_DATA_LENGTH)
                         {
                             submitButton.Status = StatusType.BLOCKED;
@@ -149,11 +160,8 @@ namespace flexchat
                     if (chgButton.Clicked())
                     {
                         mode = 1 - mode;
-                        string s = chgButton.Text;
-                        chgButton.Text = submitButton.Text;
-                        submitButton.Text = s;
-                        loginInput.Clear();
-                        passInput.Clear();
+                        chgButton.LoadTextures(Content.chg[mode], Content.chg[mode], Content.chg[mode]);
+                        submitButton.LoadTextures(Content.submitbutton[mode,0], Content.submitbutton[mode,1], Content.submitbutton[mode,0]);
                     }
                 }
                 else
@@ -161,7 +169,7 @@ namespace flexchat
                     // IF AUTHENTHICATED
                     RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(WND_WIDTH / 4, wnd.Size.Y - WND_HEIGHT / 8));
                     bg.Position = new SFML.System.Vector2f(0, WND_HEIGHT / 8);
-                    bg.FillColor = Content.color0_2;
+                    bg.FillColor = Color.Red;
                     wnd.Draw(bg);
                     uint posx = 0;
                     uint posy = WND_HEIGHT / 8 + chatsButton.sizeY;
@@ -187,7 +195,7 @@ namespace flexchat
                     }
                     bg.Size = new SFML.System.Vector2f(WND_WIDTH / 4, WND_HEIGHT / 8);
                     bg.Position = new SFML.System.Vector2f(0, 0);
-                    bg.FillColor = Content.color0_1;
+                    bg.FillColor = Color.Red;
                     wnd.Draw(bg);
                     if (chatsButton.Clicked())
                     {
@@ -233,6 +241,8 @@ namespace flexchat
                 }
 
                 err.Draw();
+
+                panel.Draw();
 
                 if (Resp.Count > 0)
                 {
@@ -282,7 +292,7 @@ namespace flexchat
                                     else
                                     {
                                         Me.ID = uint.Parse(s);
-                                        Me.Login = loginInput.Text();
+                                        Me.Login = loginInput.typed;
                                         s = "";
                                         while (respond[p] != 0)
                                         {
@@ -346,15 +356,6 @@ namespace flexchat
                                         WND_WIDTH = 900;
                                         WND_HEIGHT = 600;
                                         wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
-                                        chatsButton.Status = StatusType.BLOCKED;
-                                        chatsButton.LoadTextures(Content.Chats1, Content.Chats1, Content.Chats0);
-                                        chatsButton.SetTextColor(Color.White, Color.White, Color.White);
-                                        chatsButton.textSize = 0;
-                                        buttons.Add(chatsButton);
-                                        friendsButton.LoadTextures(Content.Friends1, Content.Friends1, Content.Friends0);
-                                        friendsButton.SetTextColor(Color.White, Color.White, Color.White);
-                                        friendsButton.textSize = 0;
-                                        buttons.Add(friendsButton);
                                     }
                                     break;
                                 case 2:
@@ -504,8 +505,8 @@ namespace flexchat
         {
             if (e.Width < WND_WIDTH)
             {
-                //wnd.Size = new SFML.System.Vector2u(WND_WIDTH, e.Height);
-                //e.Width = WND_WIDTH;
+                wnd.Size = new SFML.System.Vector2u(WND_WIDTH, e.Height);
+                e.Width = WND_WIDTH;
             }
             if (e.Height < WND_HEIGHT)
             {
@@ -528,6 +529,7 @@ namespace flexchat
 
         private static void Win_MouseMoved(object sender, MouseMoveEventArgs args)
         {
+            panel.Update(args);
             foreach (Button b in buttons)
             {
                 b.Update(args);
@@ -544,6 +546,7 @@ namespace flexchat
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
         {
+            panel.Update(args);
             err.Clear();
             foreach(TextBox t in textBoxes)
             {

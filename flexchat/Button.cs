@@ -75,7 +75,7 @@ namespace flexchat
                 Texture = textures[(byte)status],
                 Position = new SFML.System.Vector2f(pos_x, pos_y)
             };
-            if (rect.Texture == null) rect.FillColor = Content.color0;
+            if (rect.Texture == null) rect.FillColor = Color.Red;
             Program.wnd.Draw(rect);
             Text text = new Text
             {

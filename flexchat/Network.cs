@@ -38,7 +38,7 @@ namespace flexchat
             }
             catch (Exception)
             {
-                Environment.Exit(0);
+                Environment.Exit(13);
             }
         }
 
