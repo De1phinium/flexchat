@@ -52,14 +52,14 @@ namespace flexchat
                 exButton.Texture = exitButton.textureSelected;
             exButton.Position = new Vector2f(Program.wnd.Size.X - exitButton.sizeX, 0);
             Program.wnd.Draw(exButton);
-            RectangleShape line = new RectangleShape(new Vector2f(1, 17));
+            RectangleShape line = new RectangleShape(new Vector2f(1, sizey - 2));
             line.Position = new Vector2f(Program.wnd.Size.X - exitButton.sizeX, 1);
             line.FillColor = Color.White;
             Program.wnd.Draw(line);
             int x = 0;
             for (int i = 0; i < menu.Count; i++)
             {
-                RectangleShape m = new RectangleShape(new Vector2f(menu[i].sizeX, 19));
+                RectangleShape m = new RectangleShape(new Vector2f(menu[i].sizeX, sizey));
                 if (!menu[i].selected)
                     m.Texture = menu[i].texture;
                 else
@@ -85,7 +85,7 @@ namespace flexchat
             int x = 0;
             for (int i = 0; i < menu.Count; i++)
             {
-                if (e.Y < 19 && e.X >= x && e.X <= x + menu[i].sizeX)
+                if (e.Y < sizey && e.X >= x && e.X <= x + menu[i].sizeX)
                 {
                     MenuElement m = menu[i];
                     m.selected = true;

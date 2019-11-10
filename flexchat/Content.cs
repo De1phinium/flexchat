@@ -6,8 +6,26 @@ namespace flexchat
 {
     class Content
     {
+        public struct tFile
+        {
+            public int id;
+            public string filename;
+            public DateTime last_checked;
+        }
+        public struct CachedTexture
+        {
+            public int FileId;
+            public Texture texture;
+        }
+
         public const uint UINT_MAX = 4294967295;
         public const string CONTENT_DIR = "..\\Content\\";
+        public const string CACHE_DIR = "..\\Cache\\";
+        public const int CacheSizeT = 64;
+        public const int CacheSize = 128;
+
+        private static tFile[] files = new tFile[128];
+        public static CachedTexture[] cache = new CachedTexture[64];
 
         public static Font font;
 
@@ -24,8 +42,133 @@ namespace flexchat
 
         private static SortedSet<char> symbols = new SortedSet<char>();
 
+        public static int CachedTextureId(int id)
+        {
+            int res = -1;
+            for (int i = 0; i < CacheSizeT; i++)
+            {
+                if (cache[i].FileId >= 0 && files[cache[i].FileId].id == id)
+                {
+                    res = i;
+                    files[cache[i].FileId].last_checked = DateTime.Now;
+                    break;
+                }
+            }
+            if (res == -1)
+            {
+                res = LoadTexture(id);
+            }
+            return res;
+        }
+
+        public static int LoadTexture(int id)
+        {
+            int res = -1;
+            bool f = true;
+
+            for (int i = 0; i < CacheSize; i++)
+            {
+                if (files[i].id == id)
+                {
+                    int toReplace = -1;
+                    DateTime toReplaceTime = DateTime.Now;
+                    for (int j = 0; j < CacheSizeT; j++)
+                    {
+                        if (cache[j].FileId == -1)
+                        {
+                            toReplace = j;
+                            break;
+                        } else if (files[cache[j].FileId].last_checked < toReplaceTime)
+                        {
+                            toReplace = j;
+                            toReplaceTime = files[cache[j].FileId].last_checked;
+                        }
+                    }
+                    if (cache[toReplace].texture != null)
+                        cache[toReplace].texture.Dispose();
+                    try
+                    {
+                        cache[toReplace].texture = new Texture(CACHE_DIR + files[i].filename);
+                        res = toReplace;
+                    }
+                    catch (Exception)
+                    {
+                        f = false;
+                    }
+                }
+            }
+            if (res == -1 && f)
+            {
+                Program.Client.DownloadFile(id);
+            }
+            return res;
+        }
+
+        public static void DeleteCache()
+        {
+            for (int i = 0; i < CacheSizeT; i++)
+            {
+                if (cache[i].texture != null)
+                    cache[i].texture.Dispose();
+                cache[i].FileId = -1;
+            }
+            for (int i = 0; i < CacheSize; i++)
+            {
+                files[i].id = -1;
+                try
+                {
+                    System.IO.File.Delete(CACHE_DIR + files[i].filename);
+                }
+                catch (Exception)
+                {
+                    // ((
+                }
+                files[i].filename = "";
+                files[i].last_checked = DateTime.Now;
+            }
+        }
+
+        public static void AddFile(string filename)
+        {
+            string _id = "";
+            int p = 0;
+            while (filename[p] != '.')
+            {
+                _id += filename[p];
+                p++;
+            }
+            int id = int.Parse(_id);
+            int toReplace = 0;
+            DateTime toReplaceTime = DateTime.Now;
+            for (int i = 0; i < CacheSize; i++)
+            {
+                if (files[i].id < 0)
+                {
+                    toReplace = i;
+                    break;
+                }
+                else if (files[i].last_checked < toReplaceTime)
+                {
+                    toReplace = i;
+                    toReplaceTime = files[i].last_checked;
+                }
+            }
+            files[toReplace].last_checked = DateTime.Now;
+            files[toReplace].id = id;
+            files[toReplace].filename = filename;
+            Program.Client.FilesAsked.Remove(id);
+        }
+
         public static void Load()
         {
+            for (int i = 0; i < CacheSize; i++)
+            {
+                files[i].id = -1;
+            }
+            for (int i = 0; i < CacheSizeT; i++)
+            {
+                cache[i].FileId = -1;
+            }
             try
             {
                 Background = new Texture(CONTENT_DIR + "background.png");
@@ -52,7 +195,7 @@ namespace flexchat
                 submitbutton[1,1].Smooth = true;
                 chg[0].Smooth = true;
                 chg[1].Smooth = true;
-                panel.Smooth = true;
+                //panel.Smooth = true;
                 exitButton.Smooth = true;
                 exitButtonSelected.Smooth = true;
                 settings.Smooth = true;

@@ -17,6 +17,8 @@ namespace flexchat
             public uint mode;
         }
 
+        public SortedSet<int> FilesAsked = new SortedSet<int>();
+
         private TcpClient tcpClient;
         private NetworkStream netStream;
         private BinaryReader reader;
@@ -69,48 +71,107 @@ namespace flexchat
             tcpClient.Close();
         }
 
+        public void DownloadFile(int id)
+        {
+            if (!FilesAsked.Contains(id))
+            {
+                FilesAsked.Add(id);
+                SendData(Convert.ToString(id), 5);
+            }
+        }
+
         public void WaitForResponse()
         {
             string data;
+            string filename = "";
             while (true)
             {
                 data = "";
+                string s_r_id = "";
+                bool f = true;
                 try
                 {
+                    bool was0 = false;
+                    f = true;
                     while (true)
                     {
                         byte b = reader.ReadByte();
+                        if (!was0 && b == 0)
+                        {
+                            was0 = true;
+                            foreach (tRequest r in requests)
+                            {
+                                int rqid = int.Parse(data);
+                                if (r.id == rqid)
+                                {
+                                    if (r.mode == 5)
+                                    {
+                                        f = false;
+                                        filename = "";
+                                        b = reader.ReadByte();
+                                        while (b != 0)
+                                        {
+                                            filename += (char)b;
+                                            b = reader.ReadByte();
+                                        }
+                                        string _filesize = "";
+                                        b = reader.ReadByte();
+                                        while (b != 0)
+                                        {
+                                            _filesize += (char)b;
+                                            b = reader.ReadByte();
+                                        }
+                                        int filesize = int.Parse(_filesize);
+                                        byte[] buffer = new byte[filesize];
+                                        for (int i = 0; i < filesize; i++)
+                                        {
+                                            buffer[i] = reader.ReadByte();
+                                        }
+                                        File.WriteAllBytes(Content.CACHE_DIR + filename, buffer);
+                                        Content.AddFile(filename);
+                                        break;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        if (!f) break;
                         if (b == '\n') break;
-                        else data += (char)b;
+                        else
+                        {
+                             data += (char)b;
+                        }
                     }
                 }
                 catch (Exception)
                 {
                     continue;
                 }
-                string s_r_id = "";
-                int p = 0;
-                while (data[p] != 0)
+                if (f)
                 {
-                    s_r_id += data[p];
-                    p++;
-                }
-                uint r_id = uint.Parse(s_r_id);
-                List<tRequest> toDel = new List<tRequest>();
-                foreach (tRequest q in requests)
-                {
-                    if (q.id == r_id)
+                    int p = 0;
+                    while (data[p] != 0)
                     {
-                        tRequest t = q;
-                        t.respond = data;
-                        Program.Resp.Add(t);
-                        toDel.Add(q);
-                        break;
+                        s_r_id += data[p];
+                        p++;
                     }
-                }
-                foreach (tRequest q in toDel)
-                {
-                    requests.Remove(q);
+                    uint r_id = uint.Parse(s_r_id);
+                    List<tRequest> toDel = new List<tRequest>();
+                    foreach (tRequest q in requests)
+                    {
+                        if (q.id == r_id)
+                        {
+                            tRequest t = q;
+                            t.respond = data;
+                            Program.Resp.Add(t);
+                            toDel.Add(q);
+                            break;
+                        }
+                    }
+                    foreach (tRequest q in toDel)
+                    {
+                        requests.Remove(q);
+                    }
                 }
             }
         }

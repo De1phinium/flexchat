@@ -26,7 +26,7 @@ namespace flexchat
 
         public static Error err;
 
-        private static Network Client;
+        public static Network Client;
 
         private static Thread nw;
 
@@ -57,13 +57,13 @@ namespace flexchat
 
             Content.Load();
 
-            panel = new Panel(Content.panel, 19, Content.exitButton, Content.exitButtonSelected, 34);
+            panel = new Panel(Content.panel, 30, Content.exitButton, Content.exitButtonSelected, 50);
             panel.exitButton.Function += Win_Closed;
 
             Panel.MenuElement menu;
             menu.Function = null;
             menu.selected = false;
-            menu.sizeX = 49;
+            menu.sizeX = 80;
             menu.texture = Content.settings;
             menu.textureSelected = Content.settingssel;
             menu.submenu = null;
@@ -72,7 +72,7 @@ namespace flexchat
             err = new Error(20, Color.Red);
             err.Clear();
 
-            Client = new Network("192.168.1.10", 8081);
+            Client = new Network("localhost", 8081);
             nw = new Thread(Client.WaitForResponse);
             nw.Start();
 
@@ -123,6 +123,15 @@ namespace flexchat
 
                 Background.Size = new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y);
                 wnd.Draw(Background);
+
+                int fileid = Content.CachedTextureId(5);
+                if (fileid != -1)
+                {
+                    RectangleShape bebebe = new RectangleShape(new SFML.System.Vector2f(200,200));
+                    bebebe.Position = new SFML.System.Vector2f(100, 100);
+                    bebebe.Texture = Content.cache[fileid].texture;
+                    wnd.Draw(bebebe);
+                }
 
                 if (true)
                 {
@@ -353,9 +362,12 @@ namespace flexchat
                                             u.RequestData(Client);
                                         }
                                         mode = 0;
-                                        WND_WIDTH = 900;
-                                        WND_HEIGHT = 600;
-                                        wnd.Size = new SFML.System.Vector2u(WND_WIDTH, WND_HEIGHT);
+                                        WND_WIDTH = 1200;
+                                        WND_HEIGHT = 700;
+                                        if (wnd.Size.X < WND_WIDTH)
+                                            wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
+                                        if (wnd.Size.Y < WND_HEIGHT)
+                                            wnd.Size = new SFML.System.Vector2u(wnd.Size.X, WND_HEIGHT);
                                     }
                                     break;
                                 case 2:
@@ -579,6 +591,7 @@ namespace flexchat
         {
             nw.Abort();
             Client.Disconnect();
+            Content.DeleteCache();
             wnd.Close();
             Environment.Exit(0);
         }
