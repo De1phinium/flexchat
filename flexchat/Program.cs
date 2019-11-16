@@ -11,7 +11,7 @@ namespace flexchat
         public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
 
-        public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), null);
+        public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
 
         public static List<TextBox> textBoxes = new List<TextBox>();
         public static List<Button> buttons = new List<Button>();
@@ -30,6 +30,9 @@ namespace flexchat
 
         private static Thread nw;
 
+        private static DateTime UpdateTime;
+        public static DateTime LastMessageTime;
+
         public static List<Network.tRequest> Resp;
         public static List<Conversations> convs;
         public static List<Users> users;
@@ -37,10 +40,10 @@ namespace flexchat
 
         private static uint mode;
 
-        private static Panel panel;
-
         static void Main()
         {
+            LastMessageTime = DateTime.ParseExact("2000-01-01 01:01:01", "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
             Resp = new List<Network.tRequest>();
             convs = new List<Conversations>();
             users = new List<Users>();
@@ -56,18 +59,6 @@ namespace flexchat
             wnd.MouseMoved += Win_MouseMoved;
 
             Content.Load();
-
-            panel = new Panel(Content.panel, 30, Content.exitButton, Content.exitButtonSelected, 50);
-            panel.exitButton.Function += Win_Closed;
-
-            Panel.MenuElement menu;
-            menu.Function = null;
-            menu.selected = false;
-            menu.sizeX = 80;
-            menu.texture = Content.settings;
-            menu.textureSelected = Content.settingssel;
-            menu.submenu = null;
-            Panel.menu.Add(menu);
 
             err = new Error(20, Color.Red);
             err.Clear();
@@ -112,6 +103,8 @@ namespace flexchat
             Background.Texture = Content.Background;
             Background.Position = new SFML.System.Vector2f(0, 0);
 
+            UpdateTime = DateTime.Now;
+
             mode = 0;
 
             Me.pos_x = 0;
@@ -123,15 +116,6 @@ namespace flexchat
 
                 Background.Size = new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y);
                 wnd.Draw(Background);
-
-                int fileid = Content.CachedTextureId(5);
-                if (fileid != -1)
-                {
-                    RectangleShape bebebe = new RectangleShape(new SFML.System.Vector2f(200,200));
-                    bebebe.Position = new SFML.System.Vector2f(100, 100);
-                    bebebe.Texture = Content.cache[fileid].texture;
-                    wnd.Draw(bebebe);
-                }
 
                 if (true)
                 {
@@ -172,6 +156,7 @@ namespace flexchat
                         chgButton.LoadTextures(Content.chg[mode], Content.chg[mode], Content.chg[mode]);
                         submitButton.LoadTextures(Content.submitbutton[mode,0], Content.submitbutton[mode,1], Content.submitbutton[mode,0]);
                     }
+
                 }
                 else
                 {
@@ -250,8 +235,6 @@ namespace flexchat
                 }
 
                 err.Draw();
-
-                panel.Draw();
 
                 if (Resp.Count > 0)
                 {
@@ -513,6 +496,22 @@ namespace flexchat
             }
         }
         
+        private static void UpdateData()
+        {
+            const int TimePassedInSeconds = 5;
+            DateTime T = DateTime.Now;
+            DateTime U = UpdateTime;
+            U.AddSeconds(TimePassedInSeconds);
+            if (true)
+            {
+                err.code = Error.ERROR_DATA_LENGTH;
+                err.text = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss");
+                string request = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss") + Convert.ToString((char)0);
+                Client.SendData(request, 6);
+                UpdateTime = DateTime.Now;
+            }
+        }
+
         private static void Win_Resized(object sender, SizeEventArgs e)
         {
             if (e.Width < WND_WIDTH)
@@ -530,6 +529,10 @@ namespace flexchat
 
         private static void Win_KeyReleased(object sender, KeyEventArgs args)
         {
+            if (args.Code == Keyboard.Key.Space)
+            {
+                UpdateData();
+            }
         }
         private static void Win_TextEntered(object sender, TextEventArgs args)
         {
@@ -541,7 +544,6 @@ namespace flexchat
 
         private static void Win_MouseMoved(object sender, MouseMoveEventArgs args)
         {
-            panel.Update(args);
             foreach (Button b in buttons)
             {
                 b.Update(args);
@@ -558,7 +560,6 @@ namespace flexchat
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
         {
-            panel.Update(args);
             err.Clear();
             foreach(TextBox t in textBoxes)
             {

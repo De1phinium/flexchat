@@ -84,6 +84,7 @@ namespace flexchat
                             toReplaceTime = files[cache[j].FileId].last_checked;
                         }
                     }
+                    files[i].last_checked = DateTime.Now;
                     if (cache[toReplace].texture != null)
                         cache[toReplace].texture.Dispose();
                     try
@@ -153,6 +154,8 @@ namespace flexchat
                     toReplaceTime = files[i].last_checked;
                 }
             }
+            if (files[toReplace].id >= 0)
+                System.IO.File.Delete(CACHE_DIR + files[toReplace].filename);
             files[toReplace].last_checked = DateTime.Now;
             files[toReplace].id = id;
             files[toReplace].filename = filename;

@@ -60,6 +60,10 @@ namespace flexchat
         public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
             Message msg = new Message(id, sender_id, conv_id, text, sent);
+            if (msg.sent > Program.LastMessageTime)
+            {
+                Program.LastMessageTime = msg.sent;
+            }
             if (messages.Count == 0)
                 messages.Add(msg);
             else
