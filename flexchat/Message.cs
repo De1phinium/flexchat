@@ -5,7 +5,11 @@ namespace flexchat
 {
     class Message
     {
-        private const int PH_SIZE = 50;
+        private const int PH_SIZE = 60;
+        private const int TEXT_SIZE = 20;
+        private const int TIME_SIZE = 12;
+        private const int offs = 3;
+        private const int offsetX = 8;
 
         public int id;
         public int sender_id;
@@ -14,69 +18,112 @@ namespace flexchat
         public string text;
         public bool read;
 
-        public int Draw(int posx, int posy)
+        public int min(int a, int b)
         {
-            const int CharSize = 16;
-            const int TitleSize = 18;
-            string text = this.text;
-            int offset = 0;
-            int maxslen = Convert.ToInt32(Program.wnd.Size.X - (Program.WND_WIDTH / 4) - 10) / ((3*CharSize) / 5);
-            Text Dtext = new Text()
+            if (a < b) return a;
+            else return b;
+        }
+
+        public int Draw(int yc)
+        {
+            int sy = 0;
+            CircleShape photo = new CircleShape();
+            photo.Radius = PH_SIZE / 2;
+            int photoid = -1;
+            Text login = new Text();
+            login.DisplayedString = "";
+            login.Font = Content.font;
+            login.CharacterSize = TEXT_SIZE;
+            login.Position = new SFML.System.Vector2f(offs*3 + PH_SIZE, offs);
+            login.Color = Content.colorAlmostBlack;
+            Text TimeSent = new Text();
+            TimeSent.DisplayedString = sent.ToString("U");
+            TimeSent.CharacterSize = TIME_SIZE;
+            TimeSent.Font = Content.font;
+            TimeSent.Color = Content.colorDarkGray;
+            TimeSent.Position = new SFML.System.Vector2f(login.Position.X + 1, login.Position.Y + TEXT_SIZE + offs + 1);
+            if (sender_id == Program.Me.ID)
             {
-                Font = Content.font,
-                Color = Color.White,
-                CharacterSize = CharSize
-            };
-            string[] disp = new string[24];
-            int p = 0, nDisp = 0;
-            while (p + maxslen < text.Length)
-            {
-                disp[nDisp] = text.Substring(p, maxslen);
-                nDisp++;
-                p += maxslen;
+                photoid = Program.Me.photo_id;
+                login.DisplayedString = Program.Me.Login;
             }
-            if (p < text.Length - 1)
-            {
-                disp[nDisp] = text.Substring(p, text.Length - p);
-                nDisp++;
-            }
-            for (int i = nDisp; i > 0; i--)
-            {
-                offset += CharSize;
-                Dtext.Position = new SFML.System.Vector2f(posx + 18, posy - 5 - offset);
-                Dtext.DisplayedString = disp[i - 1];
-                Program.wnd.Draw(Dtext);
-            }
-            offset += PH_SIZE;
-            CircleShape ph = new CircleShape();
-            ph.FillColor = Color.White;
-            ph.Radius = (PH_SIZE - 10) / 2;
-            ph.Position = new SFML.System.Vector2f(posx + 10, posy - offset);
-            Program.wnd.Draw(ph);
-            if (Program.Me.ID == sender_id)
-            {
-                Dtext.DisplayedString = Program.Me.Login;
-            }
-            else
-            {
-                foreach (Users u in Program.users)
+            else foreach (Users u in Program.users)
                 {
                     if (u.ID == sender_id)
                     {
-                        Dtext.DisplayedString = u.Login;
-                        break;
+                        photoid = u.photo_id;
+                        login.DisplayedString = u.Login;
                     }
                 }
+            if (photoid == -1)
+            {
+                Users user = new Users("", sender_id);
+                Program.users.Add(user);
+                user.RequestData(Program.Client);
             }
-            Dtext.CharacterSize = TitleSize;
-            Dtext.Position = new SFML.System.Vector2f(posx + 7 + PH_SIZE, posy - offset);
-            Program.wnd.Draw(Dtext);
-            Dtext.CharacterSize = CharSize - 2;
-            Dtext.Color = Color.Red; ;
-            Dtext.DisplayedString = sent.ToString();
-            Dtext.Position = new SFML.System.Vector2f(posx + 10 + PH_SIZE, posy - offset + TitleSize + 2);
-            Program.wnd.Draw(Dtext);
-            return offset;
+            else
+            {
+                int textureID = Content.CachedTextureId(photoid);
+                if (textureID >= 0)
+                {
+                    photo.Texture = Content.cache[textureID].texture;
+                    photo.Texture.Smooth = true;
+                    int x = min(Convert.ToInt32(photo.Texture.Size.X), Convert.ToInt32(photo.Texture.Size.Y));
+                    photo.TextureRect = new IntRect(new SFML.System.Vector2i(0, 0), new SFML.System.Vector2i(x, x));
+                }
+                photo.Position = new SFML.System.Vector2f(offs, offs);
+                sy += PH_SIZE + (offs * 2);
+            }
+            string[] outtext = new string[64];
+            int textlen = 0;
+            outtext[0] = text;
+            Text OText = new Text();
+            OText.Font = Content.font;
+            OText.Color = Content.colorAlmostBlack;
+            OText.CharacterSize = TEXT_SIZE;
+            OText.Position = new SFML.System.Vector2f(offs * 3, offs + 2 + PH_SIZE);
+            int ind = 0;
+            bool f;
+            do
+            {
+                if (outtext[ind] == "") break;
+                f = true;
+                OText.DisplayedString = outtext[ind];
+                FloatRect tsize = OText.GetLocalBounds();
+                int xsize = Convert.ToInt32(tsize.Width);
+                string left = "";
+                while (xsize > Program.wnd.Size.X - OText.Position.X - offs * 2 - Program.CHATS_WIDTH)
+                {
+                    f = false;
+                    left = OText.DisplayedString[OText.DisplayedString.Length - 1] + left;
+                    OText.DisplayedString = OText.DisplayedString.Substring(0, OText.DisplayedString.Length - 1);
+                    tsize = OText.GetLocalBounds();
+                    xsize = Convert.ToInt32(tsize.Width);
+                }
+                outtext[ind] = OText.DisplayedString;
+                outtext[ind + 1] = left;
+                ind++;
+                textlen++;
+            } while (!f);
+            sy += textlen * (TEXT_SIZE + offs * 2);
+
+            photo.Position = new SFML.System.Vector2f(photo.Position.X + offsetX + Program.CHATS_WIDTH, yc + photo.Position.Y - sy);
+            Program.wnd.Draw(photo);
+            login.Position = new SFML.System.Vector2f(login.Position.X + offsetX + Program.CHATS_WIDTH, yc + login.Position.Y - sy);
+            Program.wnd.Draw(login);
+            TimeSent.Position = new SFML.System.Vector2f(TimeSent.Position.X + offsetX + Program.CHATS_WIDTH, yc + TimeSent.Position.Y - sy);
+            Program.wnd.Draw(TimeSent);
+            OText.Position = new SFML.System.Vector2f(OText.Position.X + offsetX + Program.CHATS_WIDTH, yc + OText.Position.Y - sy);
+            OText.DisplayedString = outtext[0];
+            Program.wnd.Draw(OText);
+            for (int i = 1; i < textlen; i++)
+            {
+                OText.DisplayedString = outtext[i];
+                OText.Position = new SFML.System.Vector2f(OText.Position.X, OText.Position.Y + TEXT_SIZE + offs * 2);
+                Program.wnd.Draw(OText);
+            }
+
+            return sy + offs * 2;
         }
         public Message(int id, int sender_id, int conv_id, string text, DateTime sent, bool read)
         {

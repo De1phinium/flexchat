@@ -16,7 +16,7 @@ namespace flexchat
 
         private string login;
         private int id;
-        public uint photo_id;
+        public int photo_id;
         private StatusType prev_status;
         public StatusType status;
 
@@ -62,7 +62,7 @@ namespace flexchat
             set { login = value; }
         }
 
-        public uint photoID
+        public int photoID
         {
             get { return photo_id;  }
             set { photo_id = value; }

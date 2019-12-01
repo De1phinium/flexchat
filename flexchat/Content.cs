@@ -40,6 +40,12 @@ namespace flexchat
         public static Texture settings;
         public static Texture settingssel;
 
+        public static Color colorLightGray;
+        public static Color colorAlmostBlack;
+        public static Color colorDarkGray;
+        public static Color colorGray;
+        public static Color colorAlmostWhite;
+
         private static SortedSet<char> symbols = new SortedSet<char>();
 
         public static int CachedTextureId(int id)
@@ -189,6 +195,12 @@ namespace flexchat
                 exitButtonSelected = new Texture(CONTENT_DIR + "exitButtonSelected.png");
                 settings = new Texture(CONTENT_DIR + "settings.png");
                 settingssel = new Texture(CONTENT_DIR + "settingssel.png");
+
+                colorAlmostBlack = new Color(35, 35, 35);
+                colorDarkGray = new Color(85, 85, 85);
+                colorGray = new Color(130, 130, 130);
+                colorLightGray = new Color(195, 195, 195);
+                colorAlmostWhite = new Color(225, 225, 225);
 
                 Background.Smooth = true;
                 LoginTextbox.Smooth = true;

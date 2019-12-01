@@ -38,11 +38,11 @@ namespace flexchat
         public static List<Conversations> convs;
         public static List<Users> users;
         public static List<int> friends;
+        public static bool SmthSelected = false;
 
         private static uint mode;
 
-        private static int ScrollLeft = 0;
-        private static int ScrollRight = 0;
+        private static int Scroll = 0;
 
         static void Main()
         {
@@ -61,6 +61,7 @@ namespace flexchat
             wnd.TextEntered += Win_TextEntered;
             wnd.MouseButtonReleased += Win_MouseButtonReleased;
             wnd.MouseMoved += Win_MouseMoved;
+            wnd.MouseWheelScrolled += Win_MouseScrolled;
 
             Content.Load();
 
@@ -166,7 +167,7 @@ namespace flexchat
                 {
                     // IF AUTH
                     // Draw Background
-                    wnd.Clear(Color.White);
+                    wnd.Clear(Content.colorAlmostWhite);
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(270, wnd.Size.Y));
                     rect.Position = new SFML.System.Vector2f(0, 0);
                     rect.Texture = Content.panel;
@@ -176,7 +177,7 @@ namespace flexchat
                     int scr = 0;
                     foreach (Conversations c in convs)
                     {
-                        int t = c.Draw(scr + ScrollLeft);
+                        int t = c.Draw(scr + Scroll);
                         if (t == 0) break;
                         else scr += t;
                     }
@@ -256,7 +257,7 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        Me.photo_id = uint.Parse(s);
+                                        Me.photo_id = int.Parse(s);
                                         s = "";
                                         while (respond[p] != 0)
                                         {
@@ -332,7 +333,7 @@ namespace flexchat
                                         s += respond[p];
                                         p++;
                                     }
-                                    uint photo_id = uint.Parse(s);
+                                    int photo_id = int.Parse(s);
                                     for (int u = 0; u < users.Count; u++)
                                     {
                                         if (users[u].ID == id)
@@ -592,6 +593,7 @@ namespace flexchat
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
         {
+            SmthSelected = false;
             err.Clear();
             foreach(TextBox t in textBoxes)
             {
@@ -627,6 +629,26 @@ namespace flexchat
             Content.DeleteCache();
             wnd.Close();
             Environment.Exit(0);
+        }
+
+        private static void Win_MouseScrolled (object sender, MouseWheelScrollEventArgs e)
+        {
+            if (e.X <= CHATS_WIDTH)
+            {
+                if (convs.Count == 0) return;
+                Scroll += -10 * Convert.ToInt32(e.Delta);
+                if (Scroll < 0) Scroll = 0;
+                if (convs.Count < wnd.Size.Y / convs[0].DSize()) Scroll = 0;
+                else
+                {
+                    if (Scroll > convs.Count * convs[0].DSize() - wnd.Size.Y)
+                        Scroll = convs.Count * convs[0].DSize() - Convert.ToInt32(wnd.Size.Y);
+                }
+            }
+            else
+            {
+
+            }
         }
     }
 }

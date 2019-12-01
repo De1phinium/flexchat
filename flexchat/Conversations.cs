@@ -9,6 +9,9 @@ namespace flexchat
         private const int PHOTO_SIZE = 70;
         private const int TITLE_SIZE = 24;
         private const int TEXT_SIZE = 18;
+        private const int offs = 5;
+        private const int Scroll = 0;
+
         public StatusType status;
         private StatusType prev_status;
         private uint msgs;
@@ -19,23 +22,14 @@ namespace flexchat
         public string title;
         public bool loaded;
 
-        public uint pos_x;
-        public uint pos_y;
+        public int pos_x;
+        public int pos_y;
 
         List<Message> messages;
 
-        public void DrawMessages()
+        public int DSize()
         {
-            int posx = Convert.ToInt32(Program.WND_WIDTH / 4);
-            int posy = Convert.ToInt32(Program.wnd.Size.Y - 68);
-            int i = 0;
-            foreach (Message m in messages)
-            {
-                if (posy < 3)
-                    break;
-                i++;
-                posy -= m.Draw(posx, posy) + 3 + 5 * i;
-            }
+            return PHOTO_SIZE + 2 * offs;
         }
 
         public uint photo_size
@@ -45,6 +39,7 @@ namespace flexchat
 
         public Conversations(int id)
         {
+            pos_x = 0;
             loaded = false;
             this.id = id;
             messages = new List<Message>();
@@ -105,10 +100,17 @@ namespace flexchat
 
         public int Draw(int yc)
         {
-            const int offs = 5;
-            int scr = 0;
-            if (loaded && (yc < Program.wnd.Size.Y && yc >= 0))
+            int scr = DSize();
+            pos_y = yc;
+            if (loaded && (yc < Program.wnd.Size.Y && yc >= -scr))
             {
+                if (status != StatusType.ACTIVE)
+                {
+                    RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH, scr));
+                    rect.Position = new SFML.System.Vector2f(0, yc);
+                    rect.FillColor = Content.colorLightGray;
+                    Program.wnd.Draw(rect);
+                }
                 scr = PHOTO_SIZE + offs*2;
                 CircleShape photo = new CircleShape();
                 photo.Position = new SFML.System.Vector2f(offs, yc + offs + 2);
@@ -169,6 +171,14 @@ namespace flexchat
                     }
                     Program.wnd.Draw(text);
                 }
+                if (status == StatusType.BLOCKED)
+                {
+                    int t = 0;
+                    for (int i = 0; i < messages.Count; i++)
+                    {
+                        t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 80 - t - Scroll);
+                    }
+                }
             }
             return scr;
         }
@@ -182,7 +192,7 @@ namespace flexchat
         {
             if (status == StatusType.BLOCKED)
                 return;
-            if (e.X >= pos_x && e.X <= pos_x + Program.WND_WIDTH / 4 && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10)
+            if (e.X >= pos_x && e.X <= pos_x + Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + DSize())
             {
                 if (status != StatusType.SELECTED)
                     prev_status = status;
@@ -198,6 +208,7 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                Program.SmthSelected = true;
                 prev_status = StatusType.BLOCKED;
                 status = prev_status;
             }
