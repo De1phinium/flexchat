@@ -15,7 +15,7 @@ namespace flexchat
         }
 
         private string login;
-        private uint id;
+        private int id;
         public uint photo_id;
         private StatusType prev_status;
         public StatusType status;
@@ -68,13 +68,13 @@ namespace flexchat
             set { photo_id = value; }
         }
 
-        public uint ID
+        public int ID
         {
             get { return id;  }
             set { id = value; }
         }
 
-        public Users(uint id)
+        public Users(int id)
         {
             this.id = id;
             status = StatusType.ACTIVE;
@@ -85,7 +85,7 @@ namespace flexchat
             Client.SendData(Convert.ToString(id), 2);
         }
 
-        public Users(string login, uint id)
+        public Users(string login, int id)
         {
             this.login = login;
             this.id = id;

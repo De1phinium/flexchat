@@ -45,6 +45,7 @@ namespace flexchat
         public static int CachedTextureId(int id)
         {
             int res = -1;
+            if (id == -1) return res;
             for (int i = 0; i < CacheSizeT; i++)
             {
                 if (cache[i].FileId >= 0 && files[cache[i].FileId].id == id)

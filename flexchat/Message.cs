@@ -12,6 +12,7 @@ namespace flexchat
         public int conv_id;
         public DateTime sent;
         public string text;
+        public bool read;
 
         public int Draw(int posx, int posy)
         {
@@ -77,13 +78,14 @@ namespace flexchat
             Program.wnd.Draw(Dtext);
             return offset;
         }
-        public Message(int id, int sender_id, int conv_id, string text, DateTime sent)
+        public Message(int id, int sender_id, int conv_id, string text, DateTime sent, bool read)
         {
             this.id = id;
             this.sender_id = sender_id;
             this.conv_id = conv_id;
             this.text = text;
             this.sent = sent;
+            this.read = read;
         }
 
         public string GetText()

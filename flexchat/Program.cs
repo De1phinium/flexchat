@@ -10,6 +10,7 @@ namespace flexchat
     {
         public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
+        public static uint CHATS_WIDTH = 270;
 
         public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
 
@@ -36,9 +37,12 @@ namespace flexchat
         public static List<Network.tRequest> Resp;
         public static List<Conversations> convs;
         public static List<Users> users;
-        public static List<uint> friends;
+        public static List<int> friends;
 
         private static uint mode;
+
+        private static int ScrollLeft = 0;
+        private static int ScrollRight = 0;
 
         static void Main()
         {
@@ -47,7 +51,7 @@ namespace flexchat
             Resp = new List<Network.tRequest>();
             convs = new List<Conversations>();
             users = new List<Users>();
-            friends = new List<uint>();
+            friends = new List<int>();
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -117,7 +121,7 @@ namespace flexchat
                 Background.Size = new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y);
                 wnd.Draw(Background);
 
-                if (true)
+                if (session_key == 0)
                 {
                     err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
                     err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
@@ -160,78 +164,30 @@ namespace flexchat
                 }
                 else
                 {
-                    // IF AUTHENTHICATED
-                    RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(WND_WIDTH / 4, wnd.Size.Y - WND_HEIGHT / 8));
-                    bg.Position = new SFML.System.Vector2f(0, WND_HEIGHT / 8);
-                    bg.FillColor = Color.Red;
-                    wnd.Draw(bg);
-                    uint posx = 0;
-                    uint posy = WND_HEIGHT / 8 + chatsButton.sizeY;
-                    if (mode == 0)
-                    {
-                        foreach (Conversations c in convs)
-                        {
-                            c.pos_x = posx;
-                            c.pos_y = posy;
-                            posy += c.photo_size + 10;
-                            c.Draw();
-                        }
-                    }
-                    else
-                    {
-                        foreach (Users u in users)
-                        {
-                            u.pos_x = posx;
-                            u.pos_y = posy;
-                            posy += u.photo_size + 10;
-                            u.Draw();
-                        }
-                    }
-                    bg.Size = new SFML.System.Vector2f(WND_WIDTH / 4, WND_HEIGHT / 8);
-                    bg.Position = new SFML.System.Vector2f(0, 0);
-                    bg.FillColor = Color.Red;
-                    wnd.Draw(bg);
-                    if (chatsButton.Clicked())
-                    {
-                        mode = 0;
-                        chatsButton.Status = StatusType.BLOCKED;
-                        friendsButton.Status = StatusType.ACTIVE;
-                    }
-                    if (friendsButton.Clicked())
-                    {
-                        mode = 1;
-                        friendsButton.Status = StatusType.BLOCKED;
-                        chatsButton.Status = StatusType.ACTIVE;
-                    }
-                    chatsButton.posX = 0;
-                    chatsButton.posY = WND_HEIGHT / 8;
-                    chatsButton.Draw();
-                    friendsButton.posX = chatsButton.sizeX;
-                    friendsButton.posY = WND_HEIGHT / 8;
-                    friendsButton.Draw();
-                    Me.Draw();
+                    // IF AUTH
+                    // Draw Background
+                    wnd.Clear(Color.White);
+                    RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(270, wnd.Size.Y));
+                    rect.Position = new SFML.System.Vector2f(0, 0);
+                    rect.Texture = Content.panel;
+                    wnd.Draw(rect);
+                    // Draw Chats
 
-                    if (mode == 0)
+                    int scr = 0;
+                    foreach (Conversations c in convs)
                     {
-                        foreach (Conversations c in convs)
-                        {
-                            if (c.status == StatusType.BLOCKED)
-                            {
-                                c.DrawMessages();
-
-                                typeMsg.posX = WND_WIDTH / 4 + 10;
-                                typeMsg.sizeX = wnd.Size.X - WND_WIDTH / 4 - 20;
-                                typeMsg.posY = wnd.Size.Y - typeMsg.sizeY - 10;
-                                typeMsg.Draw();
-
-                                break;
-                            }
-                        }
+                        int t = c.Draw(scr + ScrollLeft);
+                        if (t == 0) break;
+                        else scr += t;
                     }
-                    else
-                    {
 
-                    }
+                    // Draw User
+
+                    // Draw Messages
+
+                    //UpdateData
+
+                    UpdateData();
                 }
 
                 err.Draw();
@@ -283,7 +239,7 @@ namespace flexchat
                                     }
                                     else
                                     {
-                                        Me.ID = uint.Parse(s);
+                                        Me.ID = int.Parse(s);
                                         Me.Login = loginInput.typed;
                                         s = "";
                                         while (respond[p] != 0)
@@ -339,9 +295,9 @@ namespace flexchat
                                                 p++;
                                             }
                                             p++;
-                                            Users u = new Users(uint.Parse(s));
+                                            Users u = new Users(int.Parse(s));
                                             users.Add(u);
-                                            friends.Add(uint.Parse(s));
+                                            friends.Add(int.Parse(s));
                                             u.RequestData(Client);
                                         }
                                         mode = 0;
@@ -426,12 +382,78 @@ namespace flexchat
                                             convs[c].photo_id = ph_id;
                                             convs[c].title = s;
                                             convs[c].AskForMessages(Client);
+                                            convs[c].loaded = true;
                                             break;
                                         }
                                     }
                                     break;
                                 case 4:
-                                    while (p < respond.Length)
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    int m_id = int.Parse(s);
+                                    s = "";
+                                    p++;
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    int sender_id = int.Parse(s);
+                                    s = "";
+                                    p++;
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    int convID = int.Parse(s);
+                                    s = "";
+                                    p++;
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    string msgtext = s;
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                    bool read = false; s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    if (s == "T") read = true;
+                                    foreach (Conversations c in convs)
+                                    {
+                                        if (c.id == convID)
+                                        {
+                                            c.AddMessage(m_id, sender_id, convID, msgtext, msgSent, read);
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case 6:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int nmsgs = int.Parse(s);
+                                    for (int counter = 0; counter < nmsgs; counter++)
                                     {
                                         s = "";
                                         while (respond[p] != 0)
@@ -439,32 +461,8 @@ namespace flexchat
                                             s += respond[p];
                                             p++;
                                         }
-                                        int m_id = int.Parse(s);
-                                        s = "";
                                         p++;
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        int sender_id = int.Parse(s);
-                                        s = "";
-                                        p++;
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        int convID = int.Parse(s);
-                                        s = "";
-                                        p++;
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        string msgtext = s;
+                                        int msgid = int.Parse(s);
                                         s = "";
                                         while (respond[p] != 0)
                                         {
@@ -472,12 +470,45 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        int senderid = int.Parse(s);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        int convid = int.Parse(s);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        string txt = s;
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        DateTime timesent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        bool rd = false;
+                                        if (s == "T") rd = true;
                                         foreach (Conversations c in convs)
                                         {
-                                            if (c.id == convID)
+                                            if (c.id == convid)
                                             {
-                                                c.AddMessage(m_id, sender_id, convID, msgtext, msgSent);
+                                                c.AddMessage(msgid, senderid, convid, txt, timesent, rd);
                                                 break;
                                             }
                                         }
@@ -498,14 +529,15 @@ namespace flexchat
         
         private static void UpdateData()
         {
-            const int TimePassedInSeconds = 5;
+            const double TimePassedInSeconds = 1.5;
             DateTime T = DateTime.Now;
             DateTime U = UpdateTime;
-            U.AddSeconds(TimePassedInSeconds);
-            if (true)
+            U = U.AddSeconds(TimePassedInSeconds);
+            if (T >= U)
             {
-                err.code = Error.ERROR_DATA_LENGTH;
-                err.text = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss");
+                UpdateTime = DateTime.Now;
+                //err.code = Error.ERROR_DATA_LENGTH;
+                //err.text = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss");
                 string request = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss") + Convert.ToString((char)0);
                 Client.SendData(request, 6);
                 UpdateTime = DateTime.Now;

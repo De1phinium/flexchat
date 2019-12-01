@@ -6,9 +6,9 @@ namespace flexchat
 {
     class Conversations
     {
-        private const uint PHOTO_SIZE = 60;
-        private const uint TITLE_SIZE = 24;
-        private const uint TEXT_SIZE = 18;
+        private const int PHOTO_SIZE = 70;
+        private const int TITLE_SIZE = 24;
+        private const int TEXT_SIZE = 18;
         public StatusType status;
         private StatusType prev_status;
         private uint msgs;
@@ -17,6 +17,7 @@ namespace flexchat
         public int creator_id;
         public int photo_id;
         public string title;
+        public bool loaded;
 
         public uint pos_x;
         public uint pos_y;
@@ -44,6 +45,7 @@ namespace flexchat
 
         public Conversations(int id)
         {
+            loaded = false;
             this.id = id;
             messages = new List<Message>();
             msgs = 0;
@@ -57,9 +59,9 @@ namespace flexchat
             Client.SendData(data, 4);
         }
 
-        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent)
+        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent, bool read)
         {
-            Message msg = new Message(id, sender_id, conv_id, text, sent);
+            Message msg = new Message(id, sender_id, conv_id, text, sent, read);
             if (msg.sent > Program.LastMessageTime)
             {
                 Program.LastMessageTime = msg.sent;
@@ -79,62 +81,96 @@ namespace flexchat
             }
         }
 
-        public void Draw()
+        string GetSenderName(int msgid)
         {
-            RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.WND_WIDTH / 4, PHOTO_SIZE + 10));
-            rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
-            rect.FillColor = Color.Red;
-            if (status == StatusType.ACTIVE)
+            string s = "";
+            if (messages[msgid].sender_id == Program.Me.ID)
+                s = "You";
+            else foreach (Users u in Program.users)
             {
+                    if (u.ID == messages[msgid].sender_id)
+                    {
+                        s = u.Login;
+                        break;
+                    }
             }
-            else if (status == StatusType.SELECTED)
+            if (s == "")
             {
+                Users user = new Users("", messages[msgid].sender_id);
+                Program.users.Add(user);
+                user.RequestData(Program.Client);
             }
-            else
+            return s;
+        }
+
+        public int Draw(int yc)
+        {
+            const int offs = 5;
+            int scr = 0;
+            if (loaded && (yc < Program.wnd.Size.Y && yc >= 0))
             {
-            }
-            Program.wnd.Draw(rect);
-            if (pos_y + PHOTO_SIZE <= 5 || pos_y >= Program.wnd.Size.Y - 5)
-                return;
-            CircleShape ph = new CircleShape();
-            ph.Radius = PHOTO_SIZE / 2;
-            ph.FillColor = Color.White;
-            ph.Position = new SFML.System.Vector2f(pos_x + 5, pos_y + (Program.WND_HEIGHT / 8) / 2 - (PHOTO_SIZE / 2));
-            Program.wnd.Draw(ph);
-            Text text = new Text()
-            {
-                Font = Content.font,
-                DisplayedString = title,
-                CharacterSize = TITLE_SIZE,
-                Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 7)
-            };
-            if (status == StatusType.ACTIVE)
-            {
+                scr = PHOTO_SIZE + offs*2;
+                CircleShape photo = new CircleShape();
+                photo.Position = new SFML.System.Vector2f(offs, yc + offs + 2);
+                photo.Radius = (PHOTO_SIZE / 2);
+                int TextureId = Content.CachedTextureId(photo_id);
+                if (TextureId >= 0)
+                    photo.Texture = Content.cache[TextureId].texture;
+                Program.wnd.Draw(photo);
+                Text text = new Text();
+                text.Font = Content.font;
+                text.Position = new SFML.System.Vector2f(offs * 2 + 2 + PHOTO_SIZE, yc + offs + 3);
+                text.CharacterSize = TITLE_SIZE;
                 text.Color = Color.White;
-            }
-            else if (status == StatusType.SELECTED)
-            {
-                text.Color = Color.Red;
-            }
-            else
-            {
-                text.Color = Color.Red;
-            }
-            Program.wnd.Draw(text);
-            if (messages.Count > 0)
-            {
-                text.DisplayedString = messages[0].text;
-                if (text.DisplayedString.Length * (TEXT_SIZE / 2) >= Program.WND_WIDTH / 4 - PHOTO_SIZE - 15)
+                text.DisplayedString = title;
+                bool f = true, changed = false;
+                do
                 {
-                    int k = Convert.ToInt32((Program.WND_WIDTH / 4 - PHOTO_SIZE - 15) / (TEXT_SIZE / 2));
-                    if (text.DisplayedString.Length < k) k = text.DisplayedString.Length;
-                    text.DisplayedString = text.DisplayedString.Substring(0, k) + "...";
+                    f = true;
+                    FloatRect tsize = text.GetLocalBounds();
+                    int sizex = Convert.ToInt32(tsize.Width);
+                    if (sizex >= Program.CHATS_WIDTH - text.Position.X - offs)
+                    {
+                        f = false;
+                        if (!changed) text.DisplayedString = "..." + text.DisplayedString.Substring(0, text.DisplayedString.Length - 1);
+                        else text.DisplayedString = text.DisplayedString.Substring(0, text.DisplayedString.Length - 1);
+                        changed = true;
+                    }
+                } while (!f);
+                if (changed)
+                {
+                    text.DisplayedString = text.DisplayedString.Substring(3, text.DisplayedString.Length - 3) + "...";
                 }
-                text.Color = Color.Red;
-                text.CharacterSize = TEXT_SIZE;
-                text.Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 13 + TITLE_SIZE);
+                Program.wnd.Draw(text);
+                if (messages.Count > 0)
+                {
+                    text.Position = new SFML.System.Vector2f(text.Position.X + 1, text.Position.Y + TITLE_SIZE + offs * 2);
+                    text.CharacterSize = TEXT_SIZE;
+                    text.DisplayedString = GetSenderName(0) + ": " + messages[0].text;
+                    text.Color = Color.White;
+                    f = true;
+                    changed = false;
+                    do
+                    {
+                        f = true;
+                        FloatRect tsize = text.GetLocalBounds();
+                        int sizex = Convert.ToInt32(tsize.Width);
+                        if (sizex >= Program.CHATS_WIDTH - text.Position.X - offs)
+                        {
+                            f = false;
+                            if (!changed) text.DisplayedString = "..." + text.DisplayedString.Substring(0, text.DisplayedString.Length - 1);
+                            else text.DisplayedString = text.DisplayedString.Substring(0, text.DisplayedString.Length - 1);
+                            changed = true;
+                        }
+                    } while (!f);
+                    if (changed)
+                    {
+                        text.DisplayedString = text.DisplayedString.Substring(3, text.DisplayedString.Length - 3) + "...";
+                    }
+                    Program.wnd.Draw(text);
+                }
             }
-            Program.wnd.Draw(text);
+            return scr;
         }
 
         public void RequestData(Network Client)
