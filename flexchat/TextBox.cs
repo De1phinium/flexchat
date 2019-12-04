@@ -10,7 +10,6 @@ namespace flexchat
         public string defaultString = "";
         private int textOffset;
         private Color textColor;
-        private string cursor = "|";
         private int BlinkingRatio = 30;
         private int blink = 1;
         public int textLengthBound;

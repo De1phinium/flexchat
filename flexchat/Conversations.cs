@@ -15,6 +15,7 @@ namespace flexchat
         public StatusType status;
         private StatusType prev_status;
         private uint msgs;
+        public DateTime last_read;
 
         public int id;
         public int creator_id;
@@ -50,13 +51,13 @@ namespace flexchat
 
         public void AskForMessages(Network Client)
         {
-            string data = id.ToString() + System.Convert.ToString((char)0) + msgs.ToString();
+            string data = id.ToString() + Convert.ToString((char)0) + msgs.ToString();
             Client.SendData(data, 4);
         }
 
-        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent, bool read)
+        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
-            Message msg = new Message(id, sender_id, conv_id, text, sent, read);
+            Message msg = new Message(id, sender_id, conv_id, text, sent);
             if (msg.sent > Program.LastMessageTime)
             {
                 Program.LastMessageTime = msg.sent;
@@ -104,6 +105,8 @@ namespace flexchat
             pos_y = yc;
             if (loaded && (yc < Program.wnd.Size.Y && yc >= -scr))
             {
+                Program.err.code = Error.ERROR_DATA_LENGTH;
+                Program.err.text = last_read.ToString("U");
                 if (status != StatusType.ACTIVE)
                 {
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH, scr));

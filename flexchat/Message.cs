@@ -16,7 +16,6 @@ namespace flexchat
         public int conv_id;
         public DateTime sent;
         public string text;
-        public bool read;
 
         public int min(int a, int b)
         {
@@ -125,14 +124,13 @@ namespace flexchat
 
             return sy + offs * 2;
         }
-        public Message(int id, int sender_id, int conv_id, string text, DateTime sent, bool read)
+        public Message(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
             this.id = id;
             this.sender_id = sender_id;
             this.conv_id = conv_id;
             this.text = text;
             this.sent = sent;
-            this.read = read;
         }
 
         public string GetText()

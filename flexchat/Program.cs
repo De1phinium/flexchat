@@ -20,6 +20,8 @@ namespace flexchat
         public static Int64 session_key = 0;
         public static Users Me = new Users(0);
 
+        public static bool UpdAllowed = false;
+
         public Int64 SessionKey
         {
             set { session_key = value; }
@@ -375,13 +377,25 @@ namespace flexchat
                                         s += respond[p];
                                         p++;
                                     }
+                                    p++;
+                                    string ctitle = s;
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    DateTime lread = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                    
                                     for (int c = 0; c < convs.Count; c++)
                                     {
                                         if (convs[c].id == conv_id)
                                         {
                                             convs[c].creator_id = cr_id;
                                             convs[c].photo_id = ph_id;
-                                            convs[c].title = s;
+                                            convs[c].title = ctitle;
+                                            convs[c].last_read = lread;
                                             convs[c].AskForMessages(Client);
                                             convs[c].loaded = true;
                                             break;
@@ -395,53 +409,62 @@ namespace flexchat
                                         s += respond[p];
                                         p++;
                                     }
-                                    int m_id = int.Parse(s);
-                                    s = "";
                                     p++;
-                                    while (respond[p] != 0)
+                                    int nm = int.Parse(s);
+                                    for (int ct = 0; ct < nm; ct++)
                                     {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    int sender_id = int.Parse(s);
-                                    s = "";
-                                    p++;
-                                    while (respond[p] != 0)
-                                    {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    int convID = int.Parse(s);
-                                    s = "";
-                                    p++;
-                                    while (respond[p] != 0)
-                                    {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    p++;
-                                    string msgtext = s;
-                                    s = "";
-                                    while (respond[p] != 0)
-                                    {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    p++;
-                                    DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                                    bool read = false; s = "";
-                                    while (respond[p] != 0)
-                                    {
-                                        s += respond[p];
-                                        p++;
-                                    }
-                                    if (s == "T") read = true;
-                                    foreach (Conversations c in convs)
-                                    {
-                                        if (c.id == convID)
+                                        s = "";
+                                        while (respond[p] != 0)
                                         {
-                                            c.AddMessage(m_id, sender_id, convID, msgtext, msgSent, read);
-                                            break;
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int m_id = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int sender_id = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        int convID = int.Parse(s);
+                                        s = "";
+                                        p++;
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        string msgtext = s;
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        int last = convs.Count;
+                                        int curc = 0;
+                                        foreach (Conversations c in convs)
+                                        {
+                                            curc++;
+                                            if (c.id == convID)
+                                            {
+                                                c.AddMessage(m_id, sender_id, convID, msgtext, msgSent);
+                                                if (curc == last)
+                                                    UpdAllowed = true;
+                                                break;
+                                            }
                                         }
                                     }
                                     break;
@@ -497,19 +520,11 @@ namespace flexchat
                                         p++;
                                         DateTime timesent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                                         s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        bool rd = false;
-                                        if (s == "T") rd = true;
                                         foreach (Conversations c in convs)
                                         {
                                             if (c.id == convid)
                                             {
-                                                c.AddMessage(msgid, senderid, convid, txt, timesent, rd);
+                                                c.AddMessage(msgid, senderid, convid, txt, timesent);
                                                 break;
                                             }
                                         }
@@ -530,15 +545,15 @@ namespace flexchat
         
         private static void UpdateData()
         {
-            const double TimePassedInSeconds = 1.5;
+            if (!UpdAllowed)
+                return;
+            const double TimePassedInSeconds = 1.75;
             DateTime T = DateTime.Now;
             DateTime U = UpdateTime;
             U = U.AddSeconds(TimePassedInSeconds);
             if (T >= U)
             {
                 UpdateTime = DateTime.Now;
-                //err.code = Error.ERROR_DATA_LENGTH;
-                //err.text = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss");
                 string request = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss") + Convert.ToString((char)0);
                 Client.SendData(request, 6);
                 UpdateTime = DateTime.Now;
