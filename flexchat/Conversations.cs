@@ -26,7 +26,7 @@ namespace flexchat
         public int pos_x;
         public int pos_y;
 
-        List<Message> messages;
+        public List<Message> messages;
 
         public int DSize()
         {

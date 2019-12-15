@@ -81,6 +81,8 @@ namespace flexchat
             loginInput.defaultString = "login";
             textBoxes.Add(loginInput);
 
+            TextBox msgTextBox = new TextBox(10, 70, 46, Content.MessageTextbox, Content.MessageTextbox, 8, Content.MainColor);
+
             TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, new Color(80, 72, 153, 255));
             passInput.textLengthBound = 18;
             passInput.SpacebarAllowed = false;
@@ -90,13 +92,14 @@ namespace flexchat
             textBoxes.Add(passInput);
 
             TextBox typeMsg = new TextBox(441, 66, 16, Content.LoginTextbox, Content.LoginTextbox, 20, new Color(80, 72, 153, 255));
-            typeMsg.symbolsAllowed = true;
 
             Button submitButton = new Button("", 207, 50, StatusType.ACTIVE);
             submitButton.SetTextColor(Color.White, new Color(54, 38, 84, 255), Color.White);
             submitButton.LoadTextures(Content.submitbutton[0,0], Content.submitbutton[0,1], Content.submitbutton[0,0]);
             submitButton.textSize = 30;
             buttons.Add(submitButton);
+
+            Button SendButton = new Button("", 70, 70, StatusType.ACTIVE);
 
             Button chgButton = new Button("", 60, 21, StatusType.ACTIVE);
             chgButton.textSize = 16;
@@ -172,7 +175,7 @@ namespace flexchat
                     wnd.Clear(Content.colorAlmostWhite);
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(270, wnd.Size.Y));
                     rect.Position = new SFML.System.Vector2f(0, 0);
-                    rect.Texture = Content.panel;
+                    rect.FillColor = Content.MainColor;
                     wnd.Draw(rect);
                     // Draw Chats
 
@@ -184,13 +187,33 @@ namespace flexchat
                         else scr += t;
                     }
 
-                    // Draw User
+                    SendButton.posX = wnd.Size.X - 80;
+                    SendButton.posY = wnd.Size.Y - 75;
+                    SendButton.Draw();
 
-                    // Draw Messages
+                    msgTextBox.posX = CHATS_WIDTH + 10;
+                    msgTextBox.posY = wnd.Size.Y - 75;
+                    msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 30 - SendButton.sizeX;
+                    msgTextBox.Draw();
+
+                    // Draw User
 
                     //UpdateData
 
-                    UpdateData();
+                    if (SendButton.Clicked())
+                    {
+                        int conv_id = -1;
+                        foreach (Conversations c in convs)
+                        {
+                            if (c.status == StatusType.BLOCKED)
+                            {
+                                Client.SendMessage(c, msgTextBox.typed);
+                                break;
+                            }
+                        }
+                        msgTextBox.typed = "";
+                    }
+                    UpdateData(false);
                 }
 
                 err.Draw();
@@ -306,6 +329,14 @@ namespace flexchat
                                         mode = 0;
                                         WND_WIDTH = 1200;
                                         WND_HEIGHT = 700;
+                                        SendButton.LoadTextures(Content.SendButton, Content.SendButton_Clicked, Content.SendButton);
+                                        buttons.Add(SendButton);
+                                        msgTextBox.textLengthBound = 512;
+                                        msgTextBox.SpacebarAllowed = true;
+                                        msgTextBox.symbolsAllowed = true;
+                                        msgTextBox.defaultString = "Type your message";
+                                        msgTextBox.evAllowed = true;
+                                        textBoxes.Add(msgTextBox);
                                         if (wnd.Size.X < WND_WIDTH)
                                             wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
                                         if (wnd.Size.Y < WND_HEIGHT)
@@ -486,7 +517,7 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        int msgid = int.Parse(s);
+                                        int msgidn = int.Parse(s);
                                         s = "";
                                         while (respond[p] != 0)
                                         {
@@ -518,14 +549,45 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        DateTime timesent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        DateTime timesent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.CurrentCulture);
                                         s = "";
                                         foreach (Conversations c in convs)
                                         {
                                             if (c.id == convid)
                                             {
-                                                c.AddMessage(msgid, senderid, convid, txt, timesent);
+                                                c.AddMessage(msgidn, senderid, convid, txt, timesent);
                                                 break;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case 7:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int msgid = int.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    int convidmsg = int.Parse(s);
+                                    foreach (Conversations c in convs)
+                                    {
+                                        if (c.id == convidmsg)
+                                        {
+                                            for (int i = 0; i < c.messages.Count; i++)
+                                            {
+                                                if (c.messages[i].id == -Resp[it].id)
+                                                {
+                                                    c.id = msgid;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
@@ -543,15 +605,15 @@ namespace flexchat
             }
         }
         
-        private static void UpdateData()
+        public static void UpdateData(bool urgent)
         {
-            if (!UpdAllowed)
+            if (!urgent && !UpdAllowed)
                 return;
             const double TimePassedInSeconds = 1.75;
             DateTime T = DateTime.Now;
             DateTime U = UpdateTime;
             U = U.AddSeconds(TimePassedInSeconds);
-            if (T >= U)
+            if (urgent || T >= U)
             {
                 UpdateTime = DateTime.Now;
                 string request = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss") + Convert.ToString((char)0);
@@ -577,10 +639,6 @@ namespace flexchat
 
         private static void Win_KeyReleased(object sender, KeyEventArgs args)
         {
-            if (args.Code == Keyboard.Key.Space)
-            {
-                UpdateData();
-            }
         }
         private static void Win_TextEntered(object sender, TextEventArgs args)
         {

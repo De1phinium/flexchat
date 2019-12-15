@@ -16,6 +16,7 @@ namespace flexchat
         public string sub = "";
         public bool symbolsAllowed;
         public bool SpacebarAllowed;
+        public bool evAllowed;
         public uint textSize = 20;
 
         public TextBox(uint sizex, uint sizey, uint textSize, Texture active, Texture selected, int textOffset, Color textColor)
@@ -28,6 +29,7 @@ namespace flexchat
             textures[0] = active;
             textures[1] = selected;
             textures[2] = active;
+            evAllowed = false;
             this.textOffset = textOffset;
             this.textColor = textColor;
         }
@@ -41,7 +43,7 @@ namespace flexchat
                     if (typed.Length > 0) typed = typed.Substring(0, typed.Length - 1);
                     return;
                 }
-                if ((Content.IsSymbol(e.Unicode[0]) && symbolsAllowed) || (e.Unicode[0] == ' ' && SpacebarAllowed) || Content.TextChar(e.Unicode[0]))
+                if (evAllowed || (Content.IsSymbol(e.Unicode[0]) && symbolsAllowed) || (e.Unicode[0] == ' ' && SpacebarAllowed) || Content.TextChar(e.Unicode[0]))
                 {
                     if (typed.Length < textLengthBound)
                     {

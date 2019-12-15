@@ -80,6 +80,14 @@ namespace flexchat
             }
         }
 
+        public void SendMessage(Conversations c, string text)
+        {
+            string data = Convert.ToString(c.id) + Convert.ToString((char)0) + text;
+            uint req_id = SendData(data, 7);
+            Program.UpdateData(true);
+            c.AddMessage(-1 * Convert.ToInt32(req_id), Program.Me.ID, c.id, text, DateTime.Now);
+        }
+
         public void WaitForResponse()
         {
             string data;
