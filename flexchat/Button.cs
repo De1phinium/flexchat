@@ -11,6 +11,7 @@ namespace flexchat
 
         private Color[] textColor;
         public uint textSize;
+        public short workMode = 0;
 
         public string Text
         {

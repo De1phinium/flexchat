@@ -105,8 +105,6 @@ namespace flexchat
             pos_y = yc;
             if (loaded && (yc < Program.wnd.Size.Y && yc >= -scr))
             {
-                Program.err.code = Error.ERROR_DATA_LENGTH;
-                Program.err.text = last_read.ToString("U");
                 if (status != StatusType.ACTIVE)
                 {
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH, scr));
@@ -116,7 +114,7 @@ namespace flexchat
                 }
                 scr = PHOTO_SIZE + offs*2;
                 CircleShape photo = new CircleShape();
-                photo.Position = new SFML.System.Vector2f(offs, yc + offs + 2);
+                photo.Position = new SFML.System.Vector2f(offs, yc + offs);
                 photo.Radius = (PHOTO_SIZE / 2);
                 int TextureId = Content.CachedTextureId(photo_id);
                 if (TextureId >= 0)
@@ -200,6 +198,7 @@ namespace flexchat
                 if (status != StatusType.SELECTED)
                     prev_status = status;
                 status = StatusType.SELECTED;
+                
             }
             else
             {
@@ -214,9 +213,13 @@ namespace flexchat
                 Program.SmthSelected = true;
                 prev_status = StatusType.BLOCKED;
                 status = prev_status;
+                Program.ConvSelected = id;
+                Program.UserSelected = -1;
             }
             else
             {
+                if (Program.ConvSelected == id)
+                    Program.ConvSelected = -1;
                 prev_status = StatusType.ACTIVE;
                 status = prev_status;
             }

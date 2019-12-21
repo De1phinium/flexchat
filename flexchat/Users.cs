@@ -6,8 +6,10 @@ namespace flexchat
     class Users
     {
         private const uint DATA_MIN_LENGTH = 4;
-        private const uint PHOTO_SIZE = 60;
+        private const uint PHOTO_SIZE = 70;
+        private const uint AVA_SIZE = 200;
         private const uint CH_SIZE = 24;
+        private const uint BCH_SIZE = 70;
 
         public uint photo_size 
         {
@@ -22,39 +24,6 @@ namespace flexchat
 
         public uint pos_x;
         public uint pos_y;
-
-        public void Draw()
-        {
-            if (pos_y + PHOTO_SIZE <= 5 || pos_y >= Program.wnd.Size.Y - 5)
-                return;
-            RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.WND_WIDTH / 4, PHOTO_SIZE + 10));
-            rect.Position = new SFML.System.Vector2f(pos_x, pos_y);
-            rect.FillColor = Color.Red;
-            if (status == StatusType.ACTIVE)
-            {
-            }
-            else if (status == StatusType.SELECTED)
-            {
-            }
-            else
-            {
-            }
-            Program.wnd.Draw(rect);
-            CircleShape ph = new CircleShape();
-            ph.Radius = PHOTO_SIZE / 2;
-            ph.FillColor = Color.White;
-            ph.Position = new SFML.System.Vector2f(pos_x + 5, pos_y + (Program.WND_HEIGHT / 8) / 2 - (PHOTO_SIZE / 2));
-            Program.wnd.Draw(ph);
-            Text text = new Text()
-            {
-                Font = Content.font,
-                DisplayedString = login,
-                CharacterSize = CH_SIZE,
-                Position = new SFML.System.Vector2f(pos_x + PHOTO_SIZE + 13, pos_y + 3 + PHOTO_SIZE / 2 - CH_SIZE / 2)
-            };
-            text.Color = Color.White;
-            Program.wnd.Draw(text);
-        }
 
         public string Login
         {
@@ -104,11 +73,51 @@ namespace flexchat
             return Client.SendData(data, mode);
         }
 
+        public void Draw(uint y)
+        {
+            CircleShape photo = new CircleShape();
+            int text_id = Content.CachedTextureId(photo_id);
+            if (text_id != -1)
+            {
+                photo.Texture = Content.cache[text_id].texture;
+                photo.Radius = PHOTO_SIZE / 2;
+                photo.Position = new SFML.System.Vector2f(5, y + 5);
+                Program.wnd.Draw(photo);
+            }
+            Text login = new Text();
+            login.Font = Content.font;
+            login.CharacterSize = CH_SIZE;
+            login.Color = Content.colorLightGray;
+            login.DisplayedString = Login;
+            login.Position = new SFML.System.Vector2f(PHOTO_SIZE + 15, y + PHOTO_SIZE / 2 - 9);
+            Program.wnd.Draw(login);
+
+            if (status == StatusType.BLOCKED)
+            {
+                RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH, Program.wnd.Size.Y));
+                bg.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH, 0);
+                bg.FillColor = Content.colorAlmostBlack;
+                Program.wnd.Draw(bg);
+
+                if (text_id != -1)
+                {
+                    RectangleShape ava = new RectangleShape(new SFML.System.Vector2f(AVA_SIZE, AVA_SIZE));
+                    ava.Texture = photo.Texture;
+                    ava.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 70, 70);
+                    Program.wnd.Draw(ava);
+                }
+
+                login.CharacterSize = BCH_SIZE;
+                login.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 100 + AVA_SIZE, 100);
+                Program.wnd.Draw(login);
+            }
+        }
+
         public void Update(SFML.Window.MouseMoveEventArgs e)
         {
             if (status == StatusType.BLOCKED)
                 return;
-            if (e.X >= pos_x && e.X <= pos_x + Program.WND_WIDTH / 4 && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10)
+            if (e.X <= Program.CHATS_WIDTH && e.Y >= Program.wnd.Size.Y - PHOTO_SIZE - 10)
             {
                 if (status != StatusType.SELECTED)
                     prev_status = status;
@@ -124,11 +133,15 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                Program.UserSelected = id;
+                Program.ConvSelected = -1;
                 prev_status = StatusType.BLOCKED;
                 status = prev_status;
             }
             else
             {
+                if (Program.UserSelected == id)
+                    Program.UserSelected = -1;
                 prev_status = StatusType.ACTIVE;
                 status = prev_status;
             }

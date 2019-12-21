@@ -22,6 +22,9 @@ namespace flexchat
 
         public static bool UpdAllowed = false;
 
+        public static int UserSelected = -1;
+        public static int ConvSelected = -1;
+
         public Int64 SessionKey
         {
             set { session_key = value; }
@@ -82,6 +85,7 @@ namespace flexchat
             textBoxes.Add(loginInput);
 
             TextBox msgTextBox = new TextBox(10, 70, 46, Content.MessageTextbox, Content.MessageTextbox, 8, Content.MainColor);
+            msgTextBox.workMode = 1;
 
             TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, new Color(80, 72, 153, 255));
             passInput.textLengthBound = 18;
@@ -100,6 +104,7 @@ namespace flexchat
             buttons.Add(submitButton);
 
             Button SendButton = new Button("", 70, 70, StatusType.ACTIVE);
+            SendButton.workMode = 1;
 
             Button chgButton = new Button("", 60, 21, StatusType.ACTIVE);
             chgButton.textSize = 16;
@@ -187,16 +192,29 @@ namespace flexchat
                         else scr += t;
                     }
 
-                    SendButton.posX = wnd.Size.X - 80;
-                    SendButton.posY = wnd.Size.Y - 75;
-                    SendButton.Draw();
+                    if (ConvSelected >= 0)
+                    {
+                        SendButton.posX = wnd.Size.X - 80;
+                        SendButton.posY = wnd.Size.Y - 75;
+                        SendButton.Draw();
 
-                    msgTextBox.posX = CHATS_WIDTH + 10;
-                    msgTextBox.posY = wnd.Size.Y - 75;
-                    msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 30 - SendButton.sizeX;
-                    msgTextBox.Draw();
+                        msgTextBox.posX = CHATS_WIDTH + 10;
+                        msgTextBox.posY = wnd.Size.Y - 75;
+                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 30 - SendButton.sizeX;
+                        msgTextBox.Draw();
+                    }
+                    // Draw User(s)
 
-                    // Draw User
+                    RectangleShape mebg = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, Me.photo_size + 10));
+                    mebg.Position = new SFML.System.Vector2f(0, wnd.Size.Y - Me.photo_size - 10);
+                    if (Me.status == StatusType.SELECTED)
+                        mebg.FillColor = Content.colorDarkGray;
+                    else if (Me.status == StatusType.BLOCKED)
+                        mebg.FillColor = Content.colorGray;
+                    else
+                        mebg.FillColor = Content.colorAlmostBlack;
+                    wnd.Draw(mebg);
+                    Me.Draw(wnd.Size.Y - Me.photo_size - 10);
 
                     //UpdateData
 
@@ -336,6 +354,7 @@ namespace flexchat
                                         msgTextBox.symbolsAllowed = true;
                                         msgTextBox.defaultString = "Type your message";
                                         msgTextBox.evAllowed = true;
+                                        msgTextBox.workMode = 1;
                                         textBoxes.Add(msgTextBox);
                                         if (wnd.Size.X < WND_WIDTH)
                                             wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
@@ -662,6 +681,7 @@ namespace flexchat
             {
                 u.Update(args);
             }
+            Me.Update(args);
         }
 
         private static void Win_MouseButtonReleased(object sender, MouseButtonEventArgs args)
@@ -670,14 +690,19 @@ namespace flexchat
             err.Clear();
             foreach(TextBox t in textBoxes)
             {
+                if ((t.workMode == 1 && ConvSelected == -1) || (t.workMode == 2 && UserSelected == -1))
+                    continue;
                 t.Update(args);
             }
             foreach(Button b in buttons)
             {
+                if ((b.workMode == 1 && ConvSelected == -1) || (b.workMode == 2 && UserSelected == -1))
+                    continue;
                 b.Update(args);
             }
             if (args.X <= WND_WIDTH / 4)
             {
+                Me.Update(args);
                 if (mode == 0)
                 {
                     foreach (Conversations c in convs)

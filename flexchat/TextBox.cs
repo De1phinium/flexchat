@@ -19,6 +19,8 @@ namespace flexchat
         public bool evAllowed;
         public uint textSize = 20;
 
+        public short workMode = 0;
+
         public TextBox(uint sizex, uint sizey, uint textSize, Texture active, Texture selected, int textOffset, Color textColor)
         {
             Status = StatusType.ACTIVE;
