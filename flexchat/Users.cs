@@ -5,11 +5,11 @@ namespace flexchat
 {
     class Users
     {
-        private const uint DATA_MIN_LENGTH = 4;
-        private const uint PHOTO_SIZE = 70;
-        private const uint AVA_SIZE = 200;
-        private const uint CH_SIZE = 24;
-        private const uint BCH_SIZE = 70;
+        private const int DATA_MIN_LENGTH = 4;
+        private const int PHOTO_SIZE = 70;
+        private const int AVA_SIZE = 200;
+        private const int CH_SIZE = 24;
+        private const int BCH_SIZE = 70;
 
         public uint photo_size 
         {
@@ -73,8 +73,11 @@ namespace flexchat
             return Client.SendData(data, mode);
         }
 
-        public void Draw(uint y)
+        public int Draw(int y)
         {
+            int size = PHOTO_SIZE + 10;
+            if (y < -PHOTO_SIZE - 10 || (y >= Program.wnd.Size.Y - PHOTO_SIZE - 40 && id != Program.Me.id))
+                return 0;
             CircleShape photo = new CircleShape();
             int text_id = Content.CachedTextureId(photo_id);
             if (text_id != -1)
@@ -111,13 +114,14 @@ namespace flexchat
                 login.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 100 + AVA_SIZE, 100);
                 Program.wnd.Draw(login);
             }
+            return size;
         }
 
         public void Update(SFML.Window.MouseMoveEventArgs e)
         {
             if (status == StatusType.BLOCKED)
                 return;
-            if (e.X <= Program.CHATS_WIDTH && e.Y >= Program.wnd.Size.Y - PHOTO_SIZE - 10)
+            if (e.X <= Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10)
             {
                 if (status != StatusType.SELECTED)
                     prev_status = status;

@@ -41,6 +41,8 @@ namespace flexchat
         public static Texture SendButton;
         public static Texture SendButton_Clicked;
         public static Texture MessageTextbox;
+        public static Texture[] chgmode = new Texture[2];
+        public static Texture[] chgmodeS = new Texture[2];
 
         public static Color colorLightGray;
         public static Color colorAlmostBlack;
@@ -205,6 +207,10 @@ namespace flexchat
                 SendButton = new Texture(CONTENT_DIR + "sendbutton.png");
                 SendButton_Clicked = new Texture(CONTENT_DIR + "sendbuttonclicked.png");
                 MessageTextbox = new Texture(CONTENT_DIR + "MessageTextbox.png");
+                chgmode[0] = new Texture(CONTENT_DIR + "chgmode0.png");
+                chgmode[1] = new Texture(CONTENT_DIR + "chgmode1.png");
+                chgmodeS[0] = new Texture(CONTENT_DIR + "chgmode0S.png");
+                chgmodeS[1] = new Texture(CONTENT_DIR + "chgmode1S.png");
 
                 colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -213,6 +219,10 @@ namespace flexchat
                 colorAlmostWhite = new Color(225, 225, 225);
                 MainColor = new Color(80, 72, 153);
 
+                chgmode[0].Smooth = true;
+                chgmode[1].Smooth = true;
+                chgmodeS[0].Smooth = true;
+                chgmodeS[1].Smooth = true;
                 Background.Smooth = true;
                 LoginTextbox.Smooth = true;
                 PassTextbox.Smooth = true;

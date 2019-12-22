@@ -103,6 +103,9 @@ namespace flexchat
             submitButton.textSize = 30;
             buttons.Add(submitButton);
 
+            Button chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
+            chgmode.LoadTextures(Content.chgmode[0], Content.chgmodeS[0], Content.chgmode[0]);
+
             Button SendButton = new Button("", 70, 70, StatusType.ACTIVE);
             SendButton.workMode = 1;
 
@@ -185,12 +188,45 @@ namespace flexchat
                     // Draw Chats
 
                     int scr = 0;
-                    foreach (Conversations c in convs)
+                    if (mode == 0)
                     {
-                        int t = c.Draw(scr + Scroll);
-                        if (t == 0) break;
-                        else scr += t;
+                        foreach (Conversations c in convs)
+                        {
+                            int t = c.Draw(scr + Scroll);
+                            if (t == 0) break;
+                            else scr += t;
+                        }
                     }
+                    else
+                    {
+                        foreach(Users u in users)
+                        {
+                            if (u.status != StatusType.ACTIVE)
+                            {
+                                RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
+                                popa.Position = new SFML.System.Vector2f(0, scr + Scroll);
+                                popa.FillColor = Content.colorDarkGray;
+                                wnd.Draw(popa);
+                            }
+                            u.pos_x = 0;
+                            u.pos_y = Convert.ToUInt32(scr + Scroll);
+                            int t = u.Draw(scr + Scroll);
+                            if (t == 0) break;
+                            else scr += t;
+                        }
+                    }
+
+
+                    if (chgmode.Clicked())
+                    {
+                        mode = 1 - mode;
+                        chgmode.textures[0] = Content.chgmode[mode];
+                        chgmode.textures[1] = Content.chgmodeS[mode];
+                        chgmode.textures[2] = Content.chgmode[mode];
+                    }
+                    chgmode.posX = 0;
+                    chgmode.posY = wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY;
+                    chgmode.Draw();
 
                     if (ConvSelected >= 0)
                     {
@@ -214,7 +250,7 @@ namespace flexchat
                     else
                         mebg.FillColor = Content.colorAlmostBlack;
                     wnd.Draw(mebg);
-                    Me.Draw(wnd.Size.Y - Me.photo_size - 10);
+                    Me.Draw(Convert.ToInt32(wnd.Size.Y - Me.photo_size - 10));
 
                     //UpdateData
 
@@ -356,6 +392,8 @@ namespace flexchat
                                         msgTextBox.evAllowed = true;
                                         msgTextBox.workMode = 1;
                                         textBoxes.Add(msgTextBox);
+                                        buttons.Add(chgmode);
+                                        mode = 0;
                                         if (wnd.Size.X < WND_WIDTH)
                                             wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
                                         if (wnd.Size.Y < WND_HEIGHT)
@@ -673,14 +711,22 @@ namespace flexchat
             {
                 b.Update(args);
             }
-            foreach (Conversations c in convs)
+            if (mode == 0)
             {
-                c.Update(args);
+                foreach (Conversations c in convs)
+                {
+                    c.Update(args);
+                }
             }
-            foreach(Users u in users)
+            else
             {
-                u.Update(args);
+                foreach (Users u in users)
+                {
+                    u.Update(args);
+                }
             }
+            Me.pos_y = wnd.Size.Y - Me.photo_size - 10;
+            Me.pos_x = 0;
             Me.Update(args);
         }
 
@@ -700,7 +746,7 @@ namespace flexchat
                     continue;
                 b.Update(args);
             }
-            if (args.X <= WND_WIDTH / 4)
+            if (args.X <= CHATS_WIDTH)
             {
                 Me.Update(args);
                 if (mode == 0)
@@ -733,14 +779,17 @@ namespace flexchat
         {
             if (e.X <= CHATS_WIDTH)
             {
-                if (convs.Count == 0) return;
-                Scroll += -10 * Convert.ToInt32(e.Delta);
-                if (Scroll < 0) Scroll = 0;
-                if (convs.Count < wnd.Size.Y / convs[0].DSize()) Scroll = 0;
-                else
+                if (mode == 0)
                 {
-                    if (Scroll > convs.Count * convs[0].DSize() - wnd.Size.Y)
-                        Scroll = convs.Count * convs[0].DSize() - Convert.ToInt32(wnd.Size.Y);
+                    if (convs.Count == 0) return;
+                    Scroll += -10 * Convert.ToInt32(e.Delta);
+                    if (Scroll < 0) Scroll = 0;
+                    if (convs.Count < wnd.Size.Y / convs[0].DSize()) Scroll = 0;
+                    else
+                    {
+                        if (Scroll > convs.Count * convs[0].DSize() - wnd.Size.Y)
+                            Scroll = convs.Count * convs[0].DSize() - Convert.ToInt32(wnd.Size.Y);
+                    }
                 }
             }
             else
