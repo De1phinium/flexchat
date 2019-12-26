@@ -7,6 +7,7 @@ namespace flexchat
     class TextBox : Interface
     {
         public string typed = "";
+        public string before = "";
         public string defaultString = "";
         private int textOffset;
         private Color textColor;
@@ -20,6 +21,17 @@ namespace flexchat
         public uint textSize = 20;
 
         public short workMode = 0;
+
+        public bool Changed()
+        {
+            if (before == typed)
+                return false;
+            else
+            {
+                before = typed;
+                return true;
+            }
+        }
 
         public TextBox(uint sizex, uint sizey, uint textSize, Texture active, Texture selected, int textOffset, Color textColor)
         {
@@ -99,7 +111,10 @@ namespace flexchat
             }
             text.Font = Content.font;
             text.CharacterSize = textSize;
-            text.Position = new SFML.System.Vector2f(pos_x + textOffset, pos_y + 8);
+            text.DisplayedString = "Ig" + text.DisplayedString;
+            var bounds = text.GetLocalBounds();
+            text.DisplayedString = text.DisplayedString.Substring(2, text.DisplayedString.Length - 2);
+            text.Position = new SFML.System.Vector2f(pos_x + textOffset, pos_y + (size_y / 2) - (bounds.Height / 2) - 7);
             Program.wnd.Draw(text);
             if (status == StatusType.SELECTED)
             {

@@ -11,6 +11,7 @@ namespace flexchat
         public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
         public static uint CHATS_WIDTH = 270;
+        public static int SEARCH_HEIGHT = 30;
 
         public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
 
@@ -45,6 +46,10 @@ namespace flexchat
         public static List<int> friends;
         public static bool SmthSelected = false;
 
+        private static SortedSet<int> searchResults;
+        private static int nResults = 0;
+        private static bool search = false;
+
         private static uint mode;
 
         private static int Scroll = 0;
@@ -57,6 +62,7 @@ namespace flexchat
             convs = new List<Conversations>();
             users = new List<Users>();
             friends = new List<int>();
+            searchResults = new SortedSet<int>();
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -94,6 +100,12 @@ namespace flexchat
             passInput.defaultString = "password";
             passInput.sub = "*";
             textBoxes.Add(passInput);
+
+            TextBox SearchBox = new TextBox(CHATS_WIDTH, Convert.ToUInt32(SEARCH_HEIGHT), 22, Content.searchbox, Content.searchbox, 28, Content.colorAlmostWhite);
+            SearchBox.textLengthBound = 18;
+            SearchBox.SpacebarAllowed = false;
+            SearchBox.symbolsAllowed = false;
+            SearchBox.defaultString = "";
 
             TextBox typeMsg = new TextBox(441, 66, 16, Content.LoginTextbox, Content.LoginTextbox, 20, new Color(80, 72, 153, 255));
 
@@ -188,29 +200,52 @@ namespace flexchat
                     // Draw Chats
 
                     int scr = 0;
-                    if (mode == 0)
+                    if (!search)
                     {
-                        foreach (Conversations c in convs)
+                        if (mode == 0)
                         {
-                            int t = c.Draw(scr + Scroll);
-                            if (t == 0) break;
-                            else scr += t;
+                            foreach (Conversations c in convs)
+                            {
+                                int t = c.Draw(scr + Scroll + SEARCH_HEIGHT);
+                                if (t == 0) break;
+                                else scr += t;
+                            }
+                        }
+                        else
+                        {
+                            foreach (Users u in users)
+                            {
+                                if (u.status != StatusType.ACTIVE)
+                                {
+                                    RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
+                                    popa.Position = new SFML.System.Vector2f(0, scr + Scroll + SEARCH_HEIGHT);
+                                    popa.FillColor = Content.colorDarkGray;
+                                    wnd.Draw(popa);
+                                }
+                                u.pos_x = 0;
+                                u.pos_y = Convert.ToUInt32(scr + Scroll + SEARCH_HEIGHT);
+                                int t = u.Draw(scr + Scroll + SEARCH_HEIGHT);
+                                if (t == 0) break;
+                                else scr += t;
+                            }
                         }
                     }
                     else
                     {
-                        foreach(Users u in users)
+                        foreach (Users u in users)
                         {
+                            if (!searchResults.Contains(u.ID))
+                                continue;
                             if (u.status != StatusType.ACTIVE)
                             {
                                 RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
-                                popa.Position = new SFML.System.Vector2f(0, scr + Scroll);
+                                popa.Position = new SFML.System.Vector2f(0, scr + Scroll + SEARCH_HEIGHT);
                                 popa.FillColor = Content.colorDarkGray;
                                 wnd.Draw(popa);
                             }
                             u.pos_x = 0;
-                            u.pos_y = Convert.ToUInt32(scr + Scroll);
-                            int t = u.Draw(scr + Scroll);
+                            u.pos_y = Convert.ToUInt32(scr + Scroll + SEARCH_HEIGHT);
+                            int t = u.Draw(scr + Scroll + SEARCH_HEIGHT);
                             if (t == 0) break;
                             else scr += t;
                         }
@@ -239,6 +274,7 @@ namespace flexchat
                         msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 30 - SendButton.sizeX;
                         msgTextBox.Draw();
                     }
+
                     // Draw User(s)
 
                     RectangleShape mebg = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, Me.photo_size + 10));
@@ -252,7 +288,26 @@ namespace flexchat
                     wnd.Draw(mebg);
                     Me.Draw(Convert.ToInt32(wnd.Size.Y - Me.photo_size - 10));
 
+                    SearchBox.Draw();
+
                     //UpdateData
+
+                    if (SearchBox.Changed())
+                    {
+                        if (SearchBox.typed == "")
+                        {
+                            search = false;
+                            searchResults.Clear();
+                        }
+                        else
+                        {
+                            searchResults.Clear();
+                            nResults = 0;
+                            search = true;
+                            Scroll = 0;
+                            Client.SendData(SearchBox.typed + Convert.ToString((char)(0)) + Convert.ToString(searchResults.Count), 200);
+                        }
+                    }
 
                     if (SendButton.Clicked())
                     {
@@ -377,6 +432,7 @@ namespace flexchat
                                             p++;
                                             Users u = new Users(int.Parse(s));
                                             users.Add(u);
+                                            u.friend = true;
                                             friends.Add(int.Parse(s));
                                             u.RequestData(Client);
                                         }
@@ -393,6 +449,7 @@ namespace flexchat
                                         msgTextBox.workMode = 1;
                                         textBoxes.Add(msgTextBox);
                                         buttons.Add(chgmode);
+                                        textBoxes.Add(SearchBox);
                                         mode = 0;
                                         if (wnd.Size.X < WND_WIDTH)
                                             wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
@@ -649,6 +706,38 @@ namespace flexchat
                                         }
                                     }
                                     break;
+                                case 200:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                        s += respond[p++];
+                                    p++;
+                                    int nresults = int.Parse(s);
+                                    for (int i = 0; i < nresults; i++)
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        int res_id = int.Parse(s);
+                                        nResults++;
+                                        searchResults.Add(res_id);
+                                        bool f = false;
+                                        for (int j = 0; j < users.Count; j++)
+                                        {
+                                            if (users[j].ID == res_id)
+                                            {
+                                                f = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!f)
+                                        {
+                                            Users jopa = new Users(res_id);
+                                            jopa.RequestData(Client);
+                                            users.Add(jopa);
+                                        }
+                                    }
+                                    break;
                             }
                         }
                         toDelete.Add(Resp[it]);
@@ -746,7 +835,7 @@ namespace flexchat
                     continue;
                 b.Update(args);
             }
-            if (args.X <= CHATS_WIDTH)
+            if (args.X <= CHATS_WIDTH && args.Y > SEARCH_HEIGHT)
             {
                 Me.Update(args);
                 if (mode == 0)

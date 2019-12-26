@@ -73,6 +73,8 @@ namespace flexchat
 
         public void DownloadFile(int id)
         {
+            if (id == -1)
+                return;
             if (!FilesAsked.Contains(id))
             {
                 FilesAsked.Add(id);

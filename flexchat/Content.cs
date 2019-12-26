@@ -43,6 +43,9 @@ namespace flexchat
         public static Texture MessageTextbox;
         public static Texture[] chgmode = new Texture[2];
         public static Texture[] chgmodeS = new Texture[2];
+        public static Texture searchbox;
+        public static Texture searchbutton;
+        public static Texture searchbuttonS;
 
         public static Color colorLightGray;
         public static Color colorAlmostBlack;
@@ -211,6 +214,9 @@ namespace flexchat
                 chgmode[1] = new Texture(CONTENT_DIR + "chgmode1.png");
                 chgmodeS[0] = new Texture(CONTENT_DIR + "chgmode0S.png");
                 chgmodeS[1] = new Texture(CONTENT_DIR + "chgmode1S.png");
+                searchbox = new Texture(CONTENT_DIR + "searchbox.png");
+                searchbutton = new Texture(CONTENT_DIR + "searchbutton.png");
+                searchbuttonS = new Texture(CONTENT_DIR + "searchbuttonS.png");
 
                 colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -219,6 +225,9 @@ namespace flexchat
                 colorAlmostWhite = new Color(225, 225, 225);
                 MainColor = new Color(80, 72, 153);
 
+                searchbox.Smooth = true;
+                searchbutton.Smooth = true;
+                searchbuttonS.Smooth = true;
                 chgmode[0].Smooth = true;
                 chgmode[1].Smooth = true;
                 chgmodeS[0].Smooth = true;

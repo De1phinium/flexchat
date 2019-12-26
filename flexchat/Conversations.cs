@@ -193,7 +193,7 @@ namespace flexchat
         {
             if (status == StatusType.BLOCKED)
                 return;
-            if (e.X >= pos_x && e.X <= pos_x + Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + DSize())
+            if (e.X >= pos_x && e.X <= pos_x + Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + DSize() && e.X > Program.SEARCH_HEIGHT)
             {
                 if (status != StatusType.SELECTED)
                     prev_status = status;

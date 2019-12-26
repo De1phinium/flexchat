@@ -18,9 +18,10 @@ namespace flexchat
 
         private string login;
         private int id;
-        public int photo_id;
+        public int photo_id = -1;
         private StatusType prev_status;
         public StatusType status;
+        public bool friend = false;
 
         public uint pos_x;
         public uint pos_y;
@@ -121,7 +122,7 @@ namespace flexchat
         {
             if (status == StatusType.BLOCKED)
                 return;
-            if (e.X <= Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10)
+            if (e.X <= Program.CHATS_WIDTH && e.Y >= pos_y && e.Y <= pos_y + PHOTO_SIZE + 10 && e.Y > Program.SEARCH_HEIGHT)
             {
                 if (status != StatusType.SELECTED)
                     prev_status = status;
