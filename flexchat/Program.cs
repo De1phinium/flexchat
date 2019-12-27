@@ -301,11 +301,9 @@ namespace flexchat
                         }
                         else
                         {
-                            searchResults.Clear();
-                            nResults = 0;
                             search = true;
                             Scroll = 0;
-                            Client.SendData(SearchBox.typed + Convert.ToString((char)(0)) + Convert.ToString(searchResults.Count), 200);
+                            Client.SendData(SearchBox.typed + Convert.ToString((char)(0)) + Convert.ToString(0), 200);
                         }
                     }
 
@@ -711,15 +709,15 @@ namespace flexchat
                                     while (respond[p] != 0)
                                         s += respond[p++];
                                     p++;
-                                    int nresults = int.Parse(s);
-                                    for (int i = 0; i < nresults; i++)
+                                    searchResults.Clear();
+                                    nResults = int.Parse(s);
+                                    for (int i = 0; i < nResults; i++)
                                     {
                                         s = "";
                                         while (respond[p] != 0)
                                             s += respond[p++];
                                         p++;
                                         int res_id = int.Parse(s);
-                                        nResults++;
                                         searchResults.Add(res_id);
                                         bool f = false;
                                         for (int j = 0; j < users.Count; j++)
@@ -800,18 +798,31 @@ namespace flexchat
             {
                 b.Update(args);
             }
-            if (mode == 0)
+            if (search)
             {
-                foreach (Conversations c in convs)
+                foreach (Users u in users)
                 {
-                    c.Update(args);
+                    if (searchResults.Contains(u.ID))
+                    {
+                        u.Update(args);
+                    }
                 }
             }
             else
             {
-                foreach (Users u in users)
+                if (mode == 0)
                 {
-                    u.Update(args);
+                    foreach (Conversations c in convs)
+                    {
+                        c.Update(args);
+                    }
+                }
+                else
+                {
+                    foreach (Users u in users)
+                    {
+                        u.Update(args);
+                    }
                 }
             }
             Me.pos_y = wnd.Size.Y - Me.photo_size - 10;
@@ -838,18 +849,29 @@ namespace flexchat
             if (args.X <= CHATS_WIDTH && args.Y > SEARCH_HEIGHT)
             {
                 Me.Update(args);
-                if (mode == 0)
+                if (search)
                 {
-                    foreach (Conversations c in convs)
+                    foreach (Users u in users)
                     {
-                        c.Update(args);
+                        if (searchResults.Contains(u.ID))
+                            u.Update(args);
                     }
                 }
                 else
                 {
-                    foreach(Users u in users)
+                    if (mode == 0)
                     {
-                        u.Update(args);
+                        foreach (Conversations c in convs)
+                        {
+                            c.Update(args);
+                        }
+                    }
+                    else
+                    {
+                        foreach (Users u in users)
+                        {
+                            u.Update(args);
+                        }
                     }
                 }
             }

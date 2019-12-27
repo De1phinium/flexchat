@@ -123,9 +123,10 @@ namespace flexchat
                 {
                     if (blink == 0) blink = BlinkingRatio;
                     FloatRect textRect = text.GetLocalBounds();
+                    rect.Texture = null;
                     rect.Size = new SFML.System.Vector2f(2, sizeY * 3 / 5);
                     rect.FillColor = textColor;
-                    rect.Position = new SFML.System.Vector2f(pos_x + textOffset + Convert.ToInt32(textRect.Width) + 5, posY + sizeY / 5);
+                    rect.Position = new SFML.System.Vector2f(pos_x + textOffset + Convert.ToInt32(textRect.Width) + 5, pos_y + (size_y / 2) - (rect.Size.Y / 2) - 2);
                     Program.wnd.Draw(rect);
                 }
             }

@@ -72,9 +72,6 @@ namespace flexchat
             }
             if (res == -1)
             {
-                Program.err.code = Error.ERROR_DATA_LENGTH;
-                DateTime n = DateTime.Now;
-                Program.err.text = n.ToString("yyyy-MM-dd HH:mm:ss");
                 res = LoadTexture(id);
             }
             return res;
