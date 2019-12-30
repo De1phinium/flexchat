@@ -46,6 +46,11 @@ namespace flexchat
         public static List<int> friends;
         public static bool SmthSelected = false;
 
+        public static Button frreq = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button remfr = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button accreq = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button cancelreq = new Button("", 384, 60, StatusType.BLOCKED);
+
         private static SortedSet<int> searchResults;
         private static int nResults = 0;
         private static bool search = false;
@@ -63,6 +68,11 @@ namespace flexchat
             users = new List<Users>();
             friends = new List<int>();
             searchResults = new SortedSet<int>();
+
+            buttons.Add(frreq);
+            buttons.Add(remfr);
+            buttons.Add(accreq);
+            buttons.Add(cancelreq);
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -114,6 +124,22 @@ namespace flexchat
             submitButton.LoadTextures(Content.submitbutton[0,0], Content.submitbutton[0,1], Content.submitbutton[0,0]);
             submitButton.textSize = 30;
             buttons.Add(submitButton);
+
+            frreq.posX = CHATS_WIDTH + 70;
+            frreq.posY = 300;
+            frreq.LoadTextures(Content.frreq, Content.frreqS, Content.frreq);
+
+            remfr.posX = CHATS_WIDTH + 70;
+            remfr.posY = 300;
+            remfr.LoadTextures(Content.remfr, Content.remfrS, Content.remfr);
+
+            cancelreq.posX = CHATS_WIDTH + 70;
+            cancelreq.posY = 300;
+            cancelreq.LoadTextures(Content.cancelreq, Content.cancelreqS, Content.cancelreq);
+
+            accreq.posX = CHATS_WIDTH + 70;
+            accreq.posY = 300;
+            accreq.LoadTextures(Content.accreq, Content.accreqS, Content.accreq);
 
             Button chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
             chgmode.LoadTextures(Content.chgmode[0], Content.chgmodeS[0], Content.chgmode[0]);
@@ -215,6 +241,8 @@ namespace flexchat
                         {
                             foreach (Users u in users)
                             {
+                                if (!u.friend)
+                                    continue;
                                 if (u.status != StatusType.ACTIVE)
                                 {
                                     RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
@@ -704,6 +732,23 @@ namespace flexchat
                                         }
                                     }
                                     break;
+                                case 101:
+                                    break;
+                                case 102:
+                                    break;
+                                case 103:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                        s += respond[p++];
+                                    int frdelid = int.Parse(s);
+                                    for (int i = 0; i < users.Count; i++)
+                                    {
+                                        if (users[i].ID == frdelid)
+                                        {
+                                            users[i].friend = false;
+                                        }
+                                    }
+                                    break;
                                 case 200:
                                     s = "";
                                     while (respond[p] != 0)
@@ -848,6 +893,8 @@ namespace flexchat
             }
             if (args.X <= CHATS_WIDTH && args.Y > SEARCH_HEIGHT)
             {
+                frreq.Status = StatusType.BLOCKED;
+                remfr.Status = StatusType.BLOCKED;
                 Me.Update(args);
                 if (search)
                 {

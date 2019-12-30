@@ -98,10 +98,31 @@ namespace flexchat
 
             if (status == StatusType.BLOCKED)
             {
+
                 RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH, Program.wnd.Size.Y));
                 bg.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH, 0);
                 bg.FillColor = Content.colorAlmostBlack;
                 Program.wnd.Draw(bg);
+
+                if (id != Program.Me.ID)
+                {
+                    if (friend)
+                    {
+                        Program.remfr.Draw();
+                        if (Program.remfr.Clicked())
+                        {
+                            Program.Client.SendData(Convert.ToString(id), 103);
+                        }
+                    }
+                    else
+                    {
+                        Program.frreq.Draw();
+                        if (Program.frreq.Clicked())
+                        {
+                            Program.Client.SendData("0" + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
+                        }
+                    }
+                }
 
                 if (text_id != -1)
                 {
@@ -138,6 +159,10 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                if (friend)
+                    Program.remfr.Status = StatusType.ACTIVE;
+                else
+                    Program.frreq.Status = StatusType.ACTIVE;
                 Program.UserSelected = id;
                 Program.ConvSelected = -1;
                 prev_status = StatusType.BLOCKED;

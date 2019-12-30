@@ -46,6 +46,14 @@ namespace flexchat
         public static Texture searchbox;
         public static Texture searchbutton;
         public static Texture searchbuttonS;
+        public static Texture frreq;
+        public static Texture frreqS;
+        public static Texture remfr;
+        public static Texture remfrS;
+        public static Texture cancelreq;
+        public static Texture cancelreqS;
+        public static Texture accreq;
+        public static Texture accreqS;
 
         public static Color colorLightGray;
         public static Color colorAlmostBlack;
@@ -214,6 +222,14 @@ namespace flexchat
                 searchbox = new Texture(CONTENT_DIR + "searchbox.png");
                 searchbutton = new Texture(CONTENT_DIR + "searchbutton.png");
                 searchbuttonS = new Texture(CONTENT_DIR + "searchbuttonS.png");
+                frreq = new Texture(CONTENT_DIR + "frreq.png");
+                frreqS = new Texture(CONTENT_DIR + "frreqS.png");
+                remfr = new Texture(CONTENT_DIR + "remfr.png");
+                remfrS = new Texture(CONTENT_DIR + "remfrS.png");
+                cancelreq = new Texture(CONTENT_DIR + "cancelreq.png");
+                cancelreqS = new Texture(CONTENT_DIR + "cancelreqS.png");
+                accreq = new Texture(CONTENT_DIR + "accreq.png");
+                accreqS = new Texture(CONTENT_DIR + "accreqS.png");
 
                 colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -222,6 +238,14 @@ namespace flexchat
                 colorAlmostWhite = new Color(225, 225, 225);
                 MainColor = new Color(80, 72, 153);
 
+                cancelreq.Smooth = true;
+                cancelreqS.Smooth = true;
+                accreq.Smooth = true;
+                accreqS.Smooth = true;
+                remfr.Smooth = true;
+                remfrS.Smooth = true;
+                frreq.Smooth = true;
+                frreqS.Smooth = true;
                 searchbox.Smooth = true;
                 searchbutton.Smooth = true;
                 searchbuttonS.Smooth = true;
