@@ -54,6 +54,10 @@ namespace flexchat
         public static Texture cancelreqS;
         public static Texture accreq;
         public static Texture accreqS;
+        public static Texture accbutton;
+        public static Texture accbuttonS;
+        public static Texture denybutton;
+        public static Texture denybuttonS;
 
         public static Color colorLightGray;
         public static Color colorAlmostBlack;
@@ -230,6 +234,10 @@ namespace flexchat
                 cancelreqS = new Texture(CONTENT_DIR + "cancelreqS.png");
                 accreq = new Texture(CONTENT_DIR + "accreq.png");
                 accreqS = new Texture(CONTENT_DIR + "accreqS.png");
+                accbutton = new Texture(CONTENT_DIR + "accbutton.png");
+                accbuttonS = new Texture(CONTENT_DIR + "accbuttonS.png");
+                denybutton = new Texture(CONTENT_DIR + "denybutton.png");
+                denybuttonS = new Texture(CONTENT_DIR + "denybuttonS.png");
 
                 colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -238,6 +246,10 @@ namespace flexchat
                 colorAlmostWhite = new Color(225, 225, 225);
                 MainColor = new Color(80, 72, 153);
 
+                accbutton.Smooth = true;
+                accbuttonS.Smooth = true;
+                denybutton.Smooth = true;
+                denybuttonS.Smooth = true;
                 cancelreq.Smooth = true;
                 cancelreqS.Smooth = true;
                 accreq.Smooth = true;

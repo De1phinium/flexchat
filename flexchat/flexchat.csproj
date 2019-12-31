@@ -62,6 +62,7 @@
     <Compile Include="Content.cs" />
     <Compile Include="Conversations.cs" />
     <Compile Include="Error.cs" />
+    <Compile Include="FriendRequest.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Network.cs" />

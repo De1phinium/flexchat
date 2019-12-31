@@ -44,6 +44,7 @@ namespace flexchat
         public static List<Conversations> convs;
         public static List<Users> users;
         public static List<int> friends;
+        public static List<FriendRequest> frreqs;
         public static bool SmthSelected = false;
 
         public static Button frreq = new Button("", 384, 60, StatusType.BLOCKED);
@@ -67,6 +68,7 @@ namespace flexchat
             convs = new List<Conversations>();
             users = new List<Users>();
             friends = new List<int>();
+            frreqs = new List<FriendRequest>();
             searchResults = new SortedSet<int>();
 
             buttons.Add(frreq);
@@ -239,6 +241,23 @@ namespace flexchat
                         }
                         else
                         {
+                            foreach (FriendRequest f in frreqs)
+                            {
+                                if (!f.hidden)
+                                {
+                                    f.changeStatus(StatusType.ACTIVE);
+                                    scr += f.Draw(scr + Scroll + SEARCH_HEIGHT);
+                                    if (f.Deny.Clicked())
+                                    {
+                                        f.hidden = true;
+                                        Client.SendData("1" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
+                                    } else if (f.Accept.Clicked())
+                                    {
+                                        f.hidden = true;
+                                        Client.SendData("0" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
+                                    }
+                                }
+                            }
                             foreach (Users u in users)
                             {
                                 if (!u.friend)
@@ -283,6 +302,13 @@ namespace flexchat
                     if (chgmode.Clicked())
                     {
                         mode = 1 - mode;
+                        if (mode == 0)
+                        {
+                            foreach (FriendRequest f in frreqs)
+                            {
+                                f.changeStatus(StatusType.BLOCKED);
+                            }
+                        }
                         chgmode.textures[0] = Content.chgmode[mode];
                         chgmode.textures[1] = Content.chgmodeS[mode];
                         chgmode.textures[2] = Content.chgmode[mode];
@@ -481,6 +507,7 @@ namespace flexchat
                                             wnd.Size = new SFML.System.Vector2u(WND_WIDTH, wnd.Size.Y);
                                         if (wnd.Size.Y < WND_HEIGHT)
                                             wnd.Size = new SFML.System.Vector2u(wnd.Size.X, WND_HEIGHT);
+                                        Client.SendData("", 102);
                                     }
                                     break;
                                 case 2:
@@ -732,9 +759,203 @@ namespace flexchat
                                         }
                                     }
                                     break;
+                                case 100:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    if (s == "0")
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        int toid = int.Parse(s);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+
+                                        foreach (Users u in users)
+                                        {
+                                            if (u.ID == toid)
+                                            {
+                                                u.reqto = true;
+                                                u.reqtoid = int.Parse(s);
+                                            }
+                                        }
+                                    }
+                                    else if (s == "1")
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+
+                                        int delreqid = int.Parse(s);
+
+                                        foreach (Users u in users)
+                                        {
+                                            if (u.ID == delreqid)
+                                            {
+                                                u.reqto = false;
+                                                u.reqtoid = -1;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        int recpid = int.Parse(s);
+                                        s = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            s += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        if (s == "0")
+                                        {
+                                            foreach (Users u in users)
+                                            {
+                                                if (u.ID == recpid)
+                                                {
+                                                    u.reqto = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            s = "";
+                                            while (respond[p] != 0)
+                                            {
+                                                s += respond[p];
+                                                p++;
+                                            }
+                                            p++;
+                                            int reqid = int.Parse(s);
+                                            foreach (Users u in users)
+                                            {
+                                                if (u.ID == recpid)
+                                                {
+                                                    u.reqto = true;
+                                                    u.reqtoid = reqid;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
                                 case 101:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                        s += respond[p++];
+                                    p++;
+                                    if (s == "0")
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        int senderID = int.Parse(s);
+                                        for (int i = 0; i < frreqs.Count; i++)
+                                        {
+                                            if (frreqs[i].from == senderID)
+                                            {
+                                                frreqs.Remove(frreqs[i]);
+                                                break;
+                                            }
+                                        }
+                                        foreach (Users u in users)
+                                        {
+                                            if (u.ID == senderID)
+                                            {
+                                                u.reqfrom = false;
+                                                u.reqfromhid = false;
+                                                u.reqfromid = -1;
+                                                u.friend = true;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        int chgreqid = int.Parse(s);
+                                        for (int i = 0; i < frreqs.Count; i++)
+                                        {
+                                            if (frreqs[i].id == chgreqid)
+                                            {
+                                                FriendRequest f = frreqs[i];
+                                                f.hidden = true;
+                                                frreqs.Remove(frreqs[i]);
+                                                frreqs.Add(f);
+                                                break;
+                                            }
+                                        }
+                                        foreach (Users u in users)
+                                        {
+                                            if (u.reqfromid == chgreqid)
+                                            {
+                                                u.reqfromhid = true;
+                                            }
+                                        }
+                                    }
+
                                     break;
                                 case 102:
+                                    frreqs.Clear();
+                                    s = "";
+                                    while (respond[p] != 0)
+                                        s += respond[p++];
+                                    p++;
+                                    int nreqs = int.Parse(s);
+                                    for (int i = 0; i < nreqs; i++)
+                                    {
+                                        FriendRequest newreq = new FriendRequest();
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        newreq.id = int.Parse(s);
+
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        newreq.from = int.Parse(s);
+
+                                        s = "";
+                                        while (respond[p] != 0)
+                                            s += respond[p++];
+                                        p++;
+                                        newreq.hidden = false;
+                                        if (s == "t") newreq.hidden = true;
+                                        frreqs.Add(newreq);
+                                        frreqs[frreqs.Count - 1].Make();
+                                    }
                                     break;
                                 case 103:
                                     s = "";
@@ -843,6 +1064,11 @@ namespace flexchat
             {
                 b.Update(args);
             }
+            foreach (FriendRequest f in frreqs)
+            {
+                f.Accept.Update(args);
+                f.Deny.Update(args);
+            }
             if (search)
             {
                 foreach (Users u in users)
@@ -885,7 +1111,12 @@ namespace flexchat
                     continue;
                 t.Update(args);
             }
-            foreach(Button b in buttons)
+            foreach (FriendRequest f in frreqs)
+            {
+                f.Accept.Update(args);
+                f.Deny.Update(args);
+            }
+            foreach (Button b in buttons)
             {
                 if ((b.workMode == 1 && ConvSelected == -1) || (b.workMode == 2 && UserSelected == -1))
                     continue;

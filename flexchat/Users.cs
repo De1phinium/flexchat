@@ -22,6 +22,11 @@ namespace flexchat
         private StatusType prev_status;
         public StatusType status;
         public bool friend = false;
+        public bool reqto = false;
+        public int reqtoid = -1;
+        public bool reqfrom = false;
+        public int reqfromid = -1;
+        public bool reqfromhid = false;
 
         public uint pos_x;
         public uint pos_y;
@@ -108,6 +113,11 @@ namespace flexchat
                 {
                     if (friend)
                     {
+                        Program.frreq.Status = StatusType.BLOCKED;
+                        Program.accreq.Status = StatusType.BLOCKED;
+                        Program.cancelreq.Status = StatusType.BLOCKED;
+                        if (Program.remfr.Status == StatusType.BLOCKED)
+                            Program.remfr.Status = StatusType.ACTIVE;
                         Program.remfr.Draw();
                         if (Program.remfr.Clicked())
                         {
@@ -116,10 +126,44 @@ namespace flexchat
                     }
                     else
                     {
-                        Program.frreq.Draw();
-                        if (Program.frreq.Clicked())
+                        if (reqfrom)
                         {
-                            Program.Client.SendData("0" + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
+                            Program.frreq.Status = StatusType.BLOCKED;
+                            Program.cancelreq.Status = StatusType.BLOCKED;
+                            Program.remfr.Status = StatusType.BLOCKED;
+                            if (Program.accreq.Status == StatusType.BLOCKED)
+                                Program.accreq.Status = StatusType.ACTIVE;
+                            Program.accreq.Draw();
+                            if (Program.accreq.Clicked())
+                            {
+                                Program.Client.SendData("0" + Convert.ToString((char)(0)) + Convert.ToString(reqfromid), 101);
+                            }
+                        }
+                        else if (reqto)
+                        {
+                            Program.frreq.Status = StatusType.BLOCKED;
+                            Program.accreq.Status = StatusType.BLOCKED;
+                            Program.remfr.Status = StatusType.BLOCKED;
+                            if (Program.cancelreq.Status == StatusType.BLOCKED)
+                                Program.cancelreq.Status = StatusType.ACTIVE;
+                            Program.cancelreq.Draw();
+                            if (Program.cancelreq.Clicked() && reqtoid >= 0)
+                            {
+                                Program.Client.SendData("1" + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
+                            }
+                        }
+                        else
+                        {
+                            Program.cancelreq.Status = StatusType.BLOCKED;
+                            Program.accreq.Status = StatusType.BLOCKED;
+                            Program.remfr.Status = StatusType.BLOCKED;
+                            if (Program.frreq.Status == StatusType.BLOCKED)
+                                Program.frreq.Status = StatusType.ACTIVE;
+                            Program.frreq.Draw();
+                            if (Program.frreq.Clicked())
+                            {
+                                Program.Client.SendData("0" + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
+                            }
                         }
                     }
                 }
@@ -159,10 +203,25 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                Program.Client.SendData(Convert.ToString(2) + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
                 if (friend)
                     Program.remfr.Status = StatusType.ACTIVE;
                 else
                     Program.frreq.Status = StatusType.ACTIVE;
+                Program.cancelreq.Status = StatusType.BLOCKED;
+                Program.accreq.Status = StatusType.BLOCKED;
+                if (!reqfrom)
+                {
+                    foreach (FriendRequest f in Program.frreqs)
+                    {
+                        if (f.from == id)
+                        {
+                            reqfrom = true;
+                            reqfromhid = f.hidden;
+                            reqfromid = f.id;
+                        }
+                    }
+                }
                 Program.UserSelected = id;
                 Program.ConvSelected = -1;
                 prev_status = StatusType.BLOCKED;
