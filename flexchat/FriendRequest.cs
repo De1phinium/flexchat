@@ -38,7 +38,7 @@ namespace flexchat
                     Text text = new Text();
                     text.Font = Content.font;
                     text.CharacterSize = 25;
-                    text.Color = Content.colorLightGray;
+                    text.Color = Content.color1;
                     text.DisplayedString = login;
                     text.Position = new SFML.System.Vector2f(10, ycoor + 10);
                     Program.wnd.Draw(text);
@@ -50,7 +50,7 @@ namespace flexchat
                     Deny.Draw();
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH - 20, 1));
                     rect.Position = new SFML.System.Vector2f(10, ycoor + 49);
-                    rect.FillColor = Content.colorAlmostWhite;
+                    rect.FillColor = Content.color1;
                     Program.wnd.Draw(rect);
                 }
                 else

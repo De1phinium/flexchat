@@ -10,7 +10,7 @@ namespace flexchat
     {
         public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
-        public static uint CHATS_WIDTH = 270;
+        public static uint CHATS_WIDTH = 260;
         public static int SEARCH_HEIGHT = 30;
 
         public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
@@ -102,7 +102,7 @@ namespace flexchat
             loginInput.defaultString = "login";
             textBoxes.Add(loginInput);
 
-            TextBox msgTextBox = new TextBox(10, 70, 46, Content.MessageTextbox, Content.MessageTextbox, 8, Content.MainColor);
+            TextBox msgTextBox = new TextBox(10, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
             msgTextBox.workMode = 1;
 
             TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, new Color(80, 72, 153, 255));
@@ -113,13 +113,13 @@ namespace flexchat
             passInput.sub = "*";
             textBoxes.Add(passInput);
 
-            TextBox SearchBox = new TextBox(CHATS_WIDTH, Convert.ToUInt32(SEARCH_HEIGHT), 22, Content.searchbox, Content.searchbox, 28, Content.colorAlmostWhite);
+            TextBox SearchBox = new TextBox(CHATS_WIDTH, Convert.ToUInt32(SEARCH_HEIGHT), 22, Content.searchbox, Content.searchbox, 28, Content.color1);
             SearchBox.textLengthBound = 18;
             SearchBox.SpacebarAllowed = false;
             SearchBox.symbolsAllowed = false;
             SearchBox.defaultString = "";
 
-            TextBox typeMsg = new TextBox(441, 66, 16, Content.LoginTextbox, Content.LoginTextbox, 20, new Color(80, 72, 153, 255));
+            TextBox typeMsg = new TextBox(441, 66, 17, Content.LoginTextbox, Content.LoginTextbox, 20, new Color(80, 72, 153, 255));
 
             Button submitButton = new Button("", 207, 50, StatusType.ACTIVE);
             submitButton.SetTextColor(Color.White, new Color(54, 38, 84, 255), Color.White);
@@ -144,9 +144,9 @@ namespace flexchat
             accreq.LoadTextures(Content.accreq, Content.accreqS, Content.accreq);
 
             Button chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
-            chgmode.LoadTextures(Content.chgmode[0], Content.chgmodeS[0], Content.chgmode[0]);
+            chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
 
-            Button SendButton = new Button("", 70, 70, StatusType.ACTIVE);
+            Button SendButton = new Button("", 80, 80, StatusType.ACTIVE);
             SendButton.workMode = 1;
 
             Button chgButton = new Button("", 60, 21, StatusType.ACTIVE);
@@ -156,10 +156,6 @@ namespace flexchat
 
             Button chatsButton = new Button("", 112, 30, StatusType.ACTIVE);
             Button friendsButton = new Button("", 113, 30, StatusType.ACTIVE);
-
-            RectangleShape Background = new RectangleShape(new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y));
-            Background.Texture = Content.Background;
-            Background.Position = new SFML.System.Vector2f(0, 0);
 
             UpdateTime = DateTime.Now;
 
@@ -172,8 +168,7 @@ namespace flexchat
             {
                 wnd.DispatchEvents();
 
-                Background.Size = new SFML.System.Vector2f(wnd.Size.X, wnd.Size.Y);
-                wnd.Draw(Background);
+                wnd.Clear(Content.color1);
 
                 if (session_key == 0)
                 {
@@ -220,10 +215,9 @@ namespace flexchat
                 {
                     // IF AUTH
                     // Draw Background
-                    wnd.Clear(Content.colorAlmostWhite);
-                    RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(270, wnd.Size.Y));
+                    RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, wnd.Size.Y));
                     rect.Position = new SFML.System.Vector2f(0, 0);
-                    rect.FillColor = Content.MainColor;
+                    rect.FillColor = Content.color2;
                     wnd.Draw(rect);
                     // Draw Chats
 
@@ -266,7 +260,7 @@ namespace flexchat
                                 {
                                     RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
                                     popa.Position = new SFML.System.Vector2f(0, scr + Scroll + SEARCH_HEIGHT);
-                                    popa.FillColor = Content.colorDarkGray;
+                                    popa.FillColor = Content.color1;
                                     wnd.Draw(popa);
                                 }
                                 u.pos_x = 0;
@@ -287,7 +281,7 @@ namespace flexchat
                             {
                                 RectangleShape popa = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, u.photo_size + 10));
                                 popa.Position = new SFML.System.Vector2f(0, scr + Scroll + SEARCH_HEIGHT);
-                                popa.FillColor = Content.colorDarkGray;
+                                popa.FillColor = Content.color1;
                                 wnd.Draw(popa);
                             }
                             u.pos_x = 0;
@@ -310,7 +304,7 @@ namespace flexchat
                             }
                         }
                         chgmode.textures[0] = Content.chgmode[mode];
-                        chgmode.textures[1] = Content.chgmodeS[mode];
+                        chgmode.textures[1] = Content.chgmode[mode];
                         chgmode.textures[2] = Content.chgmode[mode];
                     }
                     chgmode.posX = 0;
@@ -319,30 +313,31 @@ namespace flexchat
 
                     if (ConvSelected >= 0)
                     {
-                        SendButton.posX = wnd.Size.X - 80;
-                        SendButton.posY = wnd.Size.Y - 75;
-                        SendButton.Draw();
-
                         msgTextBox.posX = CHATS_WIDTH + 10;
-                        msgTextBox.posY = wnd.Size.Y - 75;
-                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 30 - SendButton.sizeX;
+                        msgTextBox.posY = wnd.Size.Y - 80;
+                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 10;
                         msgTextBox.Draw();
+
+                        SendButton.posX = wnd.Size.X - 80;
+                        SendButton.posY = wnd.Size.Y - 80;
+                        SendButton.Draw();
                     }
 
                     // Draw User(s)
 
                     RectangleShape mebg = new RectangleShape(new SFML.System.Vector2f(CHATS_WIDTH, Me.photo_size + 10));
                     mebg.Position = new SFML.System.Vector2f(0, wnd.Size.Y - Me.photo_size - 10);
-                    if (Me.status == StatusType.SELECTED)
-                        mebg.FillColor = Content.colorDarkGray;
-                    else if (Me.status == StatusType.BLOCKED)
-                        mebg.FillColor = Content.colorGray;
-                    else
-                        mebg.FillColor = Content.colorAlmostBlack;
+                    if (Me.status == StatusType.SELECTED || Me.status == StatusType.BLOCKED)
+                        mebg.FillColor = Content.color1;
+                    else mebg.FillColor = Content.color2;
                     wnd.Draw(mebg);
                     Me.Draw(Convert.ToInt32(wnd.Size.Y - Me.photo_size - 10));
 
                     SearchBox.Draw();
+                    RectangleShape poloska = new RectangleShape(new SFML.System.Vector2f(236, 2));
+                    poloska.FillColor = Content.color1;
+                    poloska.Position = new SFML.System.Vector2f(12, SearchBox.sizeY);
+                    wnd.Draw(poloska);
 
                     //UpdateData
 
@@ -584,6 +579,14 @@ namespace flexchat
                                         p++;
                                     }
                                     p++;
+                                    int second_person = int.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
                                     DateTime lread = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                                     
                                     for (int c = 0; c < convs.Count; c++)
@@ -596,6 +599,7 @@ namespace flexchat
                                             convs[c].last_read = lread;
                                             convs[c].AskForMessages(Client);
                                             convs[c].loaded = true;
+                                            convs[c].second_person = second_person;
                                             break;
                                         }
                                     }

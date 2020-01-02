@@ -7,8 +7,8 @@ namespace flexchat
     class Conversations
     {
         private const int PHOTO_SIZE = 70;
-        private const int TITLE_SIZE = 24;
-        private const int TEXT_SIZE = 18;
+        private const int TITLE_SIZE = 22;
+        private const int TEXT_SIZE = 17;
         private const int offs = 5;
         private const int Scroll = 0;
 
@@ -22,6 +22,7 @@ namespace flexchat
         public int photo_id;
         public string title;
         public bool loaded;
+        public int second_person;
 
         public int pos_x;
         public int pos_y;
@@ -42,6 +43,7 @@ namespace flexchat
         {
             pos_x = 0;
             loaded = false;
+            second_person = 0;
             this.id = id;
             messages = new List<Message>();
             msgs = 0;
@@ -109,22 +111,37 @@ namespace flexchat
                 {
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH, scr));
                     rect.Position = new SFML.System.Vector2f(0, yc);
-                    rect.FillColor = Content.colorLightGray;
+                    rect.FillColor = Content.color1;
                     Program.wnd.Draw(rect);
                 }
                 scr = PHOTO_SIZE + offs*2;
                 CircleShape photo = new CircleShape();
-                photo.Position = new SFML.System.Vector2f(offs, yc + offs);
-                photo.Radius = (PHOTO_SIZE / 2);
-                int TextureId = Content.CachedTextureId(photo_id);
+                photo.Radius = (PHOTO_SIZE - 6) / 2;
+                photo.Position = new SFML.System.Vector2f(10, yc + ((PHOTO_SIZE + 10) / 2) - (photo.Radius));
+                int TextureId = 0;
+                if (second_person == 0)
+                    TextureId = Content.CachedTextureId(photo_id);
+                else
+                {
+                    foreach (Users u in Program.users)
+                    {
+                        if (u.ID == second_person || u.ID == creator_id)
+                        {
+                            TextureId = Content.CachedTextureId(u.photo_id);
+                            break;
+                        }
+                    }
+                }
                 if (TextureId >= 0)
                     photo.Texture = Content.cache[TextureId].texture;
                 Program.wnd.Draw(photo);
                 Text text = new Text();
                 text.Font = Content.font;
-                text.Position = new SFML.System.Vector2f(offs * 2 + 2 + PHOTO_SIZE, yc + offs + 3);
+                text.Position = new SFML.System.Vector2f(80, yc + offs + 3);
                 text.CharacterSize = TITLE_SIZE;
-                text.Color = Color.White;
+                if (status == StatusType.ACTIVE)
+                    text.Color = Content.color1;
+                else text.Color = Content.color2;
                 text.DisplayedString = title;
                 bool f = true, changed = false;
                 do
@@ -150,7 +167,10 @@ namespace flexchat
                     text.Position = new SFML.System.Vector2f(text.Position.X + 1, text.Position.Y + TITLE_SIZE + offs * 2);
                     text.CharacterSize = TEXT_SIZE;
                     text.DisplayedString = GetSenderName(0) + ": " + messages[0].text;
-                    text.Color = Color.White;
+                    if (status == StatusType.ACTIVE)
+                        text.Color = Content.color1;
+                    else
+                        text.Color = Content.color2;
                     f = true;
                     changed = false;
                     do
@@ -174,11 +194,22 @@ namespace flexchat
                 }
                 if (status == StatusType.BLOCKED)
                 {
+                    RectangleShape titlebox = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH - 10, 80));
+                    titlebox.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, 0);
+                    titlebox.Texture = Content.titlebox;
                     int t = 0;
                     for (int i = 0; i < messages.Count; i++)
                     {
-                        t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 80 - t - Scroll);
+                        t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 90 - t - Scroll);
                     }
+                    Program.wnd.Draw(titlebox);
+                    Text Ttext = new Text();
+                    Ttext.CharacterSize = 50;
+                    Ttext.DisplayedString = title;
+                    Ttext.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 22, 8);
+                    Ttext.Font = Content.font;
+                    Ttext.Color = Content.color1;
+                    Program.wnd.Draw(Ttext);
                 }
             }
             return scr;

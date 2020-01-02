@@ -6,9 +6,9 @@ namespace flexchat
     class Message
     {
         private const int PH_SIZE = 60;
-        private const int TEXT_SIZE = 20;
+        private const int TEXT_SIZE = 22;
         private const int TIME_SIZE = 12;
-        private const int offs = 3;
+        private const int offs = 4;
         private const int offsetX = 8;
 
         public int id;
@@ -34,12 +34,12 @@ namespace flexchat
             login.Font = Content.font;
             login.CharacterSize = TEXT_SIZE;
             login.Position = new SFML.System.Vector2f(offs*3 + PH_SIZE, offs);
-            login.Color = Content.colorAlmostBlack;
+            login.Color = Content.color2;
             Text TimeSent = new Text();
             TimeSent.DisplayedString = sent.ToString("U");
             TimeSent.CharacterSize = TIME_SIZE;
             TimeSent.Font = Content.font;
-            TimeSent.Color = Content.colorDarkGray;
+            TimeSent.Color = Content.color2;
             TimeSent.Position = new SFML.System.Vector2f(login.Position.X + 1, login.Position.Y + TEXT_SIZE + offs + 1);
             if (sender_id == Program.Me.ID)
             {
@@ -78,7 +78,7 @@ namespace flexchat
             outtext[0] = text;
             Text OText = new Text();
             OText.Font = Content.font;
-            OText.Color = Content.colorAlmostBlack;
+            OText.Color = Content.color2;
             OText.CharacterSize = TEXT_SIZE;
             OText.Position = new SFML.System.Vector2f(offs * 3, offs + 2 + PH_SIZE);
             int ind = 0;

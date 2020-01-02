@@ -29,23 +29,15 @@ namespace flexchat
 
         public static Font font;
 
-        public static Texture Background;
         public static Texture LoginTextbox;
         public static Texture PassTextbox;
         public static Texture[,] submitbutton = new Texture[2,2];
         public static Texture[] chg = new Texture[2];
-        public static Texture exitButton;
-        public static Texture exitButtonSelected;
-        public static Texture settings;
-        public static Texture settingssel;
         public static Texture SendButton;
         public static Texture SendButton_Clicked;
         public static Texture MessageTextbox;
         public static Texture[] chgmode = new Texture[2];
-        public static Texture[] chgmodeS = new Texture[2];
         public static Texture searchbox;
-        public static Texture searchbutton;
-        public static Texture searchbuttonS;
         public static Texture frreq;
         public static Texture frreqS;
         public static Texture remfr;
@@ -58,13 +50,10 @@ namespace flexchat
         public static Texture accbuttonS;
         public static Texture denybutton;
         public static Texture denybuttonS;
+        public static Texture titlebox;
 
-        public static Color colorLightGray;
-        public static Color colorAlmostBlack;
-        public static Color colorDarkGray;
-        public static Color colorGray;
-        public static Color colorAlmostWhite;
-        public static Color MainColor;
+        public static Color color1;
+        public static Color color2;
 
         private static SortedSet<char> symbols = new SortedSet<char>();
 
@@ -203,7 +192,6 @@ namespace flexchat
             }
             try
             {
-                Background = new Texture(CONTENT_DIR + "background.png");
                 LoginTextbox = new Texture(CONTENT_DIR + "logininp.png");
                 PassTextbox = new Texture(CONTENT_DIR + "passinp.png");
                 submitbutton[0,0] = new Texture(CONTENT_DIR + "signinbutton.png");
@@ -212,20 +200,12 @@ namespace flexchat
                 submitbutton[1,1] = new Texture(CONTENT_DIR + "signupbuttonsel.png");
                 chg[0] = new Texture(CONTENT_DIR + "chgsignup.png");
                 chg[1] = new Texture(CONTENT_DIR + "chgsignin.png");
-                exitButton = new Texture(CONTENT_DIR + "exitButton.png");
-                exitButtonSelected = new Texture(CONTENT_DIR + "exitButtonSelected.png");
-                settings = new Texture(CONTENT_DIR + "settings.png");
-                settingssel = new Texture(CONTENT_DIR + "settingssel.png");
                 SendButton = new Texture(CONTENT_DIR + "sendbutton.png");
                 SendButton_Clicked = new Texture(CONTENT_DIR + "sendbuttonclicked.png");
-                MessageTextbox = new Texture(CONTENT_DIR + "MessageTextbox.png");
+                MessageTextbox = new Texture(CONTENT_DIR + "MessageTextBox.png");
                 chgmode[0] = new Texture(CONTENT_DIR + "chgmode0.png");
                 chgmode[1] = new Texture(CONTENT_DIR + "chgmode1.png");
-                chgmodeS[0] = new Texture(CONTENT_DIR + "chgmode0S.png");
-                chgmodeS[1] = new Texture(CONTENT_DIR + "chgmode1S.png");
                 searchbox = new Texture(CONTENT_DIR + "searchbox.png");
-                searchbutton = new Texture(CONTENT_DIR + "searchbutton.png");
-                searchbuttonS = new Texture(CONTENT_DIR + "searchbuttonS.png");
                 frreq = new Texture(CONTENT_DIR + "frreq.png");
                 frreqS = new Texture(CONTENT_DIR + "frreqS.png");
                 remfr = new Texture(CONTENT_DIR + "remfr.png");
@@ -238,13 +218,17 @@ namespace flexchat
                 accbuttonS = new Texture(CONTENT_DIR + "accbuttonS.png");
                 denybutton = new Texture(CONTENT_DIR + "denybutton.png");
                 denybuttonS = new Texture(CONTENT_DIR + "denybuttonS.png");
+                titlebox = new Texture(CONTENT_DIR + "titlebox.png");
 
-                colorAlmostBlack = new Color(35, 35, 35);
+                /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
                 colorGray = new Color(130, 130, 130);
                 colorLightGray = new Color(195, 195, 195);
                 colorAlmostWhite = new Color(225, 225, 225);
-                MainColor = new Color(80, 72, 153);
+                MainColor = new Color(80, 72, 153);*/
+
+                color1 = new Color(250, 250, 250);
+                color2 = new Color(6, 110, 119);
 
                 accbutton.Smooth = true;
                 accbuttonS.Smooth = true;
@@ -259,13 +243,8 @@ namespace flexchat
                 frreq.Smooth = true;
                 frreqS.Smooth = true;
                 searchbox.Smooth = true;
-                searchbutton.Smooth = true;
-                searchbuttonS.Smooth = true;
-                chgmode[0].Smooth = true;
-                chgmode[1].Smooth = true;
-                chgmodeS[0].Smooth = true;
-                chgmodeS[1].Smooth = true;
-                Background.Smooth = true;
+                //chgmode[0].Smooth = true;
+                //chgmode[1].Smooth = true;
                 LoginTextbox.Smooth = true;
                 PassTextbox.Smooth = true;
                 submitbutton[0,0].Smooth = true;
@@ -274,12 +253,9 @@ namespace flexchat
                 submitbutton[1,1].Smooth = true;
                 chg[0].Smooth = true;
                 chg[1].Smooth = true;
-                exitButton.Smooth = true;
-                exitButtonSelected.Smooth = true;
-                settings.Smooth = true;
-                settingssel.Smooth = true;
                 SendButton.Smooth = true;
-                //MessageTextbox.Smooth = true;
+                SendButton_Clicked.Smooth = true;
+                MessageTextbox.Smooth = true;
 
                 font = new Font(CONTENT_DIR + "tahoma.ttf");
             }

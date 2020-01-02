@@ -18,7 +18,7 @@ namespace flexchat
         public bool symbolsAllowed;
         public bool SpacebarAllowed;
         public bool evAllowed;
-        public uint textSize = 20;
+        public uint textSize = 22;
 
         public short workMode = 0;
 

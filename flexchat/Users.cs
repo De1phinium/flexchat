@@ -8,7 +8,7 @@ namespace flexchat
         private const int DATA_MIN_LENGTH = 4;
         private const int PHOTO_SIZE = 70;
         private const int AVA_SIZE = 200;
-        private const int CH_SIZE = 24;
+        private const int CH_SIZE = 28;
         private const int BCH_SIZE = 70;
 
         public uint photo_size 
@@ -89,25 +89,23 @@ namespace flexchat
             if (text_id != -1)
             {
                 photo.Texture = Content.cache[text_id].texture;
-                photo.Radius = PHOTO_SIZE / 2;
-                photo.Position = new SFML.System.Vector2f(5, y + 5);
+                photo.Radius = (PHOTO_SIZE - 6) / 2;
+                photo.Position = new SFML.System.Vector2f(10, y + ((PHOTO_SIZE + 10) / 2) - (photo.Radius));
                 Program.wnd.Draw(photo);
             }
             Text login = new Text();
             login.Font = Content.font;
             login.CharacterSize = CH_SIZE;
-            login.Color = Content.colorLightGray;
+            if (status == StatusType.ACTIVE)
+                login.Color = Content.color1;
+            else login.Color = Content.color2;
             login.DisplayedString = Login;
-            login.Position = new SFML.System.Vector2f(PHOTO_SIZE + 15, y + PHOTO_SIZE / 2 - 9);
+            var lb = login.GetLocalBounds();
+            login.Position = new SFML.System.Vector2f(80, y + ((PHOTO_SIZE + 10) / 2) - (lb.Height / 2) - 5);
             Program.wnd.Draw(login);
 
             if (status == StatusType.BLOCKED)
             {
-
-                RectangleShape bg = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH, Program.wnd.Size.Y));
-                bg.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH, 0);
-                bg.FillColor = Content.colorAlmostBlack;
-                Program.wnd.Draw(bg);
 
                 if (id != Program.Me.ID)
                 {
