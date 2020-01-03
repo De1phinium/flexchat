@@ -10,7 +10,7 @@ namespace flexchat
         private const int TITLE_SIZE = 22;
         private const int TEXT_SIZE = 17;
         private const int offs = 5;
-        private const int Scroll = 0;
+        private int Scroll = 0;
 
         public StatusType status;
         private StatusType prev_status;
@@ -200,8 +200,13 @@ namespace flexchat
                     int t = 0;
                     for (int i = 0; i < messages.Count; i++)
                     {
-                        t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 90 - t - Scroll);
+                        t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 100 - t - Scroll);
                     }
+                    Program.wnd.Draw(titlebox);
+                    titlebox.Texture = null;
+                    titlebox.FillColor = Content.color1;
+                    titlebox.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, titlebox.Size.Y);
+                    titlebox.Size = new SFML.System.Vector2f(titlebox.Size.X, 1);
                     Program.wnd.Draw(titlebox);
                     Text Ttext = new Text();
                     Ttext.CharacterSize = 50;
@@ -253,6 +258,20 @@ namespace flexchat
                     Program.ConvSelected = -1;
                 prev_status = StatusType.ACTIVE;
                 status = prev_status;
+            }
+        }
+
+        public void Update(SFML.Window.MouseWheelScrollEventArgs e)
+        {
+            if (e.Delta < 0)
+            {
+                if (Scroll + 20 > 0)
+                    Scroll = 0;
+                else Scroll += 20;
+            }
+            else
+            {
+                Scroll -= 20;
             }
         }
     }

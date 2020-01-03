@@ -317,6 +317,10 @@ namespace flexchat
                         msgTextBox.posY = wnd.Size.Y - 80;
                         msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 10;
                         msgTextBox.Draw();
+                        RectangleShape liniya = new RectangleShape(new SFML.System.Vector2f(msgTextBox.sizeX, 1));
+                        liniya.Position = new SFML.System.Vector2f(msgTextBox.posX, msgTextBox.posY);
+                        liniya.FillColor = Content.color1;
+                        wnd.Draw(liniya);
 
                         SendButton.posX = wnd.Size.X - 80;
                         SendButton.posY = wnd.Size.Y - 80;
@@ -1187,7 +1191,13 @@ namespace flexchat
             }
             else
             {
-
+                if (mode == 0)
+                {
+                    foreach (Conversations c in convs)
+                    {
+                        c.Update(e);
+                    }
+                }
             }
         }
     }

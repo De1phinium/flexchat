@@ -51,6 +51,7 @@ namespace flexchat
         public static Texture denybutton;
         public static Texture denybuttonS;
         public static Texture titlebox;
+        public static Texture msgbox;
 
         public static Color color1;
         public static Color color2;
@@ -219,6 +220,7 @@ namespace flexchat
                 denybutton = new Texture(CONTENT_DIR + "denybutton.png");
                 denybuttonS = new Texture(CONTENT_DIR + "denybuttonS.png");
                 titlebox = new Texture(CONTENT_DIR + "titlebox.png");
+                msgbox = new Texture(CONTENT_DIR + "msgbox.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -230,6 +232,7 @@ namespace flexchat
                 color1 = new Color(250, 250, 250);
                 color2 = new Color(6, 110, 119);
 
+                msgbox.Smooth = true;
                 accbutton.Smooth = true;
                 accbuttonS.Smooth = true;
                 denybutton.Smooth = true;
@@ -243,8 +246,8 @@ namespace flexchat
                 frreq.Smooth = true;
                 frreqS.Smooth = true;
                 searchbox.Smooth = true;
-                //chgmode[0].Smooth = true;
-                //chgmode[1].Smooth = true;
+                chgmode[0].Smooth = true;
+                chgmode[1].Smooth = true;
                 LoginTextbox.Smooth = true;
                 PassTextbox.Smooth = true;
                 submitbutton[0,0].Smooth = true;

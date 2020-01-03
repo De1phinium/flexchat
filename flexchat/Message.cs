@@ -9,7 +9,9 @@ namespace flexchat
         private const int TEXT_SIZE = 22;
         private const int TIME_SIZE = 12;
         private const int offs = 4;
-        private const int offsetX = 8;
+        private const int offsetX = 12;
+
+        public int drawsizey = 0;
 
         public int id;
         public int sender_id;
@@ -34,13 +36,19 @@ namespace flexchat
             login.Font = Content.font;
             login.CharacterSize = TEXT_SIZE;
             login.Position = new SFML.System.Vector2f(offs*3 + PH_SIZE, offs);
-            login.Color = Content.color2;
+            login.Color = Content.color1;
+            var loginbounds = login.GetLocalBounds();
+            int boxwidth = PH_SIZE + Convert.ToInt32(loginbounds.Width);
             Text TimeSent = new Text();
             TimeSent.DisplayedString = sent.ToString("U");
             TimeSent.CharacterSize = TIME_SIZE;
             TimeSent.Font = Content.font;
-            TimeSent.Color = Content.color2;
+            TimeSent.Color = Content.color1;
             TimeSent.Position = new SFML.System.Vector2f(login.Position.X + 1, login.Position.Y + TEXT_SIZE + offs + 1);
+            var tbounds = TimeSent.GetLocalBounds();
+            if (boxwidth < PH_SIZE + Convert.ToInt32(tbounds.Width))
+                boxwidth = PH_SIZE + Convert.ToInt32(tbounds.Width);
+            boxwidth += 5;
             if (sender_id == Program.Me.ID)
             {
                 photoid = Program.Me.photo_id;
@@ -78,7 +86,7 @@ namespace flexchat
             outtext[0] = text;
             Text OText = new Text();
             OText.Font = Content.font;
-            OText.Color = Content.color2;
+            OText.Color = Content.color1;
             OText.CharacterSize = TEXT_SIZE;
             OText.Position = new SFML.System.Vector2f(offs * 3, offs + 2 + PH_SIZE);
             int ind = 0;
@@ -91,14 +99,41 @@ namespace flexchat
                 FloatRect tsize = OText.GetLocalBounds();
                 int xsize = Convert.ToInt32(tsize.Width);
                 string left = "";
-                while (xsize > Program.wnd.Size.X - OText.Position.X - offs * 2 - Program.CHATS_WIDTH)
+                while (xsize > 2 * (Program.wnd.Size.X - Program.CHATS_WIDTH - 20) / 3)
                 {
                     f = false;
-                    left = OText.DisplayedString[OText.DisplayedString.Length - 1] + left;
-                    OText.DisplayedString = OText.DisplayedString.Substring(0, OText.DisplayedString.Length - 1);
+                    int lb = OText.DisplayedString.Length - 1;
+                    while (lb > 0 && OText.DisplayedString[lb] != ' ')
+                    {
+                        lb--;
+                    }
+                    string backup = OText.DisplayedString;
+                    OText.DisplayedString = OText.DisplayedString.Substring(0, lb);
+                    var locbounds = OText.GetLocalBounds();
+                    float dif1 = (2 * (Program.wnd.Size.X - Program.CHATS_WIDTH - 20) / 3) - locbounds.Width;
+                    left = backup.Substring(lb, backup.Length - lb) + left;
+                    if (dif1 > 50)
+                    {
+                        OText.DisplayedString = backup.Substring(0, backup.Length - ((backup.Length - lb) / 2));
+                        locbounds = OText.GetLocalBounds();
+                        float dif2 = (2 * (Program.wnd.Size.X - Program.CHATS_WIDTH - 20) / 3) - locbounds.Width;
+                        if (Math.Abs(dif1) <= Math.Abs(dif2))
+                        {
+                            OText.DisplayedString = backup.Substring(0, lb);
+                        }
+                        else
+                        {
+                            left = backup.Substring(backup.Length - lb / 2, lb / 2) + left;
+                        }
+                    }
                     tsize = OText.GetLocalBounds();
                     xsize = Convert.ToInt32(tsize.Width);
                 }
+                var lbd = OText.GetLocalBounds();
+                if (lbd.Width > boxwidth + 10)
+                    boxwidth = Convert.ToInt32(lbd.Width) + 10;
+                while (OText.DisplayedString[0] == ' ')
+                    OText.DisplayedString = OText.DisplayedString.Substring(1, OText.DisplayedString.Length - 1);
                 outtext[ind] = OText.DisplayedString;
                 outtext[ind + 1] = left;
                 ind++;
@@ -106,6 +141,10 @@ namespace flexchat
             } while (!f);
             sy += textlen * (TEXT_SIZE + offs * 2);
 
+            RectangleShape box = new RectangleShape(new SFML.System.Vector2f(boxwidth + 20, sy + 6));
+            box.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, yc - sy);
+            box.Texture = Content.msgbox;
+            Program.wnd.Draw(box);
             photo.Position = new SFML.System.Vector2f(photo.Position.X + offsetX + Program.CHATS_WIDTH, yc + photo.Position.Y - sy);
             Program.wnd.Draw(photo);
             login.Position = new SFML.System.Vector2f(login.Position.X + offsetX + Program.CHATS_WIDTH, yc + login.Position.Y - sy);
@@ -114,15 +153,22 @@ namespace flexchat
             Program.wnd.Draw(TimeSent);
             OText.Position = new SFML.System.Vector2f(OText.Position.X + offsetX + Program.CHATS_WIDTH, yc + OText.Position.Y - sy);
             OText.DisplayedString = outtext[0];
+            while (OText.DisplayedString[0] == ' ')
+                OText.DisplayedString = OText.DisplayedString.Substring(1, OText.DisplayedString.Length - 1);
             Program.wnd.Draw(OText);
             for (int i = 1; i < textlen; i++)
             {
                 OText.DisplayedString = outtext[i];
+                if (OText.DisplayedString.Length < 1)
+                    break;
+                while (OText.DisplayedString[0] == ' ')
+                    OText.DisplayedString = OText.DisplayedString.Substring(1, OText.DisplayedString.Length - 1);
                 OText.Position = new SFML.System.Vector2f(OText.Position.X, OText.Position.Y + TEXT_SIZE + offs * 2);
                 Program.wnd.Draw(OText);
             }
 
-            return sy + offs * 2;
+            drawsizey = sy + offs * 2 + 5;
+            return sy + offs * 2 + 5;
         }
         public Message(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
