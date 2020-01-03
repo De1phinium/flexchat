@@ -194,7 +194,7 @@ namespace flexchat
                 }
                 if (status == StatusType.BLOCKED)
                 {
-                    RectangleShape titlebox = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH - 10, 80));
+                    RectangleShape titlebox = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH - 10, 75));
                     titlebox.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, 0);
                     titlebox.Texture = Content.titlebox;
                     int t = 0;
@@ -203,15 +203,39 @@ namespace flexchat
                         t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 100 - t - Scroll);
                     }
                     Program.wnd.Draw(titlebox);
+
                     titlebox.Texture = null;
                     titlebox.FillColor = Content.color1;
                     titlebox.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, titlebox.Size.Y);
                     titlebox.Size = new SFML.System.Vector2f(titlebox.Size.X, 1);
                     Program.wnd.Draw(titlebox);
+
+                    if (Program.convmenu.Status == StatusType.SELECTED)
+                    {
+                        if (Program.chgtitle.Status != StatusType.SELECTED)
+                            Program.chgtitle.Status = StatusType.ACTIVE;
+                    }
+                    else
+                    {
+                        if (Program.chgtitle.Status == StatusType.SELECTED)
+                            Program.convmenu.Status = StatusType.SELECTED;
+                        else
+                            Program.chgtitle.Status = StatusType.BLOCKED;
+                    }
+
+                    Program.convmenu.posX = Program.wnd.Size.X - Program.convmenu.sizeX;
+                    Program.convmenu.Draw();
+                    if (Program.chgtitle.Status != StatusType.BLOCKED)
+                    {
+                        Program.chgtitle.posY = 75;
+                        Program.chgtitle.posX = Program.wnd.Size.X - Program.chgtitle.sizeX;
+                        Program.chgtitle.Draw();
+                    }
+
                     Text Ttext = new Text();
                     Ttext.CharacterSize = 50;
                     Ttext.DisplayedString = title;
-                    Ttext.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 22, 8);
+                    Ttext.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 22, 6);
                     Ttext.Font = Content.font;
                     Ttext.Color = Content.color1;
                     Program.wnd.Draw(Ttext);
@@ -251,9 +275,13 @@ namespace flexchat
                 status = prev_status;
                 Program.ConvSelected = id;
                 Program.UserSelected = -1;
+                Program.convmenu.Status = StatusType.ACTIVE;
             }
             else
             {
+                if (status == StatusType.ACTIVE)
+                    Program.convmenu.Status = StatusType.BLOCKED;
+                Program.chgtitle.Status = StatusType.BLOCKED;
                 if (Program.ConvSelected == id)
                     Program.ConvSelected = -1;
                 prev_status = StatusType.ACTIVE;

@@ -52,6 +52,10 @@ namespace flexchat
         public static Texture denybuttonS;
         public static Texture titlebox;
         public static Texture msgbox;
+        public static Texture convmenu;
+        public static Texture convmenuS;
+        public static Texture chgtitle;
+        public static Texture chgtitleS;
 
         public static Color color1;
         public static Color color2;
@@ -221,6 +225,10 @@ namespace flexchat
                 denybuttonS = new Texture(CONTENT_DIR + "denybuttonS.png");
                 titlebox = new Texture(CONTENT_DIR + "titlebox.png");
                 msgbox = new Texture(CONTENT_DIR + "msgbox.png");
+                convmenu = new Texture(CONTENT_DIR + "convmenu.png");
+                convmenuS = new Texture(CONTENT_DIR + "convmenuS.png");
+                chgtitle = new Texture(CONTENT_DIR + "chgtitle.png");
+                chgtitleS = new Texture(CONTENT_DIR + "chgtitleS.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -232,6 +240,10 @@ namespace flexchat
                 color1 = new Color(250, 250, 250);
                 color2 = new Color(6, 110, 119);
 
+                convmenu.Smooth = true;
+                convmenuS.Smooth = true;
+                chgtitle.Smooth = true;
+                chgtitleS.Smooth = true;
                 msgbox.Smooth = true;
                 accbutton.Smooth = true;
                 accbuttonS.Smooth = true;

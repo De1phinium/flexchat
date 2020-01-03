@@ -52,6 +52,9 @@ namespace flexchat
         public static Button accreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button cancelreq = new Button("", 384, 60, StatusType.BLOCKED);
 
+        public static Button convmenu = new Button("", 75, 75, StatusType.BLOCKED);
+        public static Button chgtitle = new Button("", 250, 50, StatusType.BLOCKED);
+
         private static SortedSet<int> searchResults;
         private static int nResults = 0;
         private static bool search = false;
@@ -75,6 +78,9 @@ namespace flexchat
             buttons.Add(remfr);
             buttons.Add(accreq);
             buttons.Add(cancelreq);
+
+            buttons.Add(convmenu);
+            buttons.Add(chgtitle);
 
             wnd.SetVerticalSyncEnabled(true);
 
@@ -142,6 +148,11 @@ namespace flexchat
             accreq.posX = CHATS_WIDTH + 70;
             accreq.posY = 300;
             accreq.LoadTextures(Content.accreq, Content.accreqS, Content.accreq);
+
+            convmenu.posY = 0;
+            convmenu.LoadTextures(Content.convmenu, Content.convmenuS, Content.convmenuS);
+            chgtitle.posY = 0;
+            chgtitle.LoadTextures(Content.chgtitle, Content.chgtitleS, Content.chgtitleS);
 
             Button chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
             chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
