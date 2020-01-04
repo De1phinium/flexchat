@@ -27,6 +27,8 @@ namespace flexchat
 
         public int Draw(int yc)
         {
+            if (drawsizey != 0 && yc <= -drawsizey)
+                return 0;
             int sy = 0;
             CircleShape photo = new CircleShape();
             photo.Radius = PH_SIZE / 2;

@@ -56,6 +56,8 @@ namespace flexchat
         public static Texture convmenuS;
         public static Texture chgtitle;
         public static Texture chgtitleS;
+        public static Texture createconv;
+        public static Texture createconvS;
 
         public static Color color1;
         public static Color color2;
@@ -229,6 +231,8 @@ namespace flexchat
                 convmenuS = new Texture(CONTENT_DIR + "convmenuS.png");
                 chgtitle = new Texture(CONTENT_DIR + "chgtitle.png");
                 chgtitleS = new Texture(CONTENT_DIR + "chgtitleS.png");
+                createconv = new Texture(CONTENT_DIR + "createconv.png");
+                createconvS = new Texture(CONTENT_DIR + "createconvS.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -240,6 +244,8 @@ namespace flexchat
                 color1 = new Color(250, 250, 250);
                 color2 = new Color(6, 110, 119);
 
+                createconv.Smooth = true;
+                createconvS.Smooth = true;
                 convmenu.Smooth = true;
                 convmenuS.Smooth = true;
                 chgtitle.Smooth = true;

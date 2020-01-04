@@ -194,13 +194,18 @@ namespace flexchat
                 }
                 if (status == StatusType.BLOCKED)
                 {
+                    if (Program.convmenu.Status == StatusType.BLOCKED)
+                        Program.convmenu.Status = StatusType.ACTIVE;
                     RectangleShape titlebox = new RectangleShape(new SFML.System.Vector2f(Program.wnd.Size.X - Program.CHATS_WIDTH - 10, 75));
                     titlebox.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 10, 0);
                     titlebox.Texture = Content.titlebox;
                     int t = 0;
                     for (int i = 0; i < messages.Count; i++)
                     {
+                        int lastt = t;
                         t += messages[i].Draw(Convert.ToInt32(Program.wnd.Size.Y) - 100 - t - Scroll);
+                        if (lastt == t)
+                            break;
                     }
                     Program.wnd.Draw(titlebox);
 
@@ -279,7 +284,7 @@ namespace flexchat
             }
             else
             {
-                if (status == StatusType.ACTIVE)
+                if (status == StatusType.BLOCKED)
                     Program.convmenu.Status = StatusType.BLOCKED;
                 Program.chgtitle.Status = StatusType.BLOCKED;
                 if (Program.ConvSelected == id)
@@ -293,13 +298,23 @@ namespace flexchat
         {
             if (e.Delta < 0)
             {
-                if (Scroll + 20 > 0)
+                if (Scroll + 40 > 0)
                     Scroll = 0;
-                else Scroll += 20;
+                else Scroll += 40;
             }
             else
             {
-                Scroll -= 20;
+                int sum = 0;
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    sum -= messages[i].drawsizey;
+                }
+                if (-sum >= Program.wnd.Size.Y - 170)
+                {
+                    Scroll -= 40;
+                    if (Scroll < sum + (Program.wnd.Size.Y - 170))
+                        Scroll = sum + Convert.ToInt32(Program.wnd.Size.Y - 170);
+                }
             }
         }
     }

@@ -28,8 +28,8 @@ namespace flexchat
         public int reqfromid = -1;
         public bool reqfromhid = false;
 
-        public uint pos_x;
-        public uint pos_y;
+        public int pos_x;
+        public int pos_y;
 
         public string Login
         {
@@ -106,9 +106,24 @@ namespace flexchat
 
             if (status == StatusType.BLOCKED)
             {
-
                 if (id != Program.Me.ID)
                 {
+                    Program.createconv.Draw();
+                    if (Program.createconv.Clicked())
+                    {
+                        Program.Client.SendData(Convert.ToString(id), 300);
+                        Program.createconv.Status = StatusType.BLOCKED;
+                        Program.frreq.Status = StatusType.BLOCKED;
+                        Program.accreq.Status = StatusType.BLOCKED;
+                        Program.cancelreq.Status = StatusType.BLOCKED;
+                        Program.remfr.Status = StatusType.BLOCKED;
+                        status = StatusType.ACTIVE;
+                        Program.Scroll = 0;
+                        Program.mode = 0;
+                        Program.UserSelected = -1;
+                        Program.chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
+                    }
+
                     if (friend)
                     {
                         Program.frreq.Status = StatusType.BLOCKED;
@@ -201,6 +216,7 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                Program.createconv.Status = StatusType.ACTIVE;
                 Program.Client.SendData(Convert.ToString(2) + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
                 if (friend)
                     Program.remfr.Status = StatusType.ACTIVE;
@@ -227,6 +243,8 @@ namespace flexchat
             }
             else
             {
+                if (status == StatusType.BLOCKED)
+                    Program.createconv.Status = StatusType.BLOCKED;
                 if (Program.UserSelected == id)
                     Program.UserSelected = -1;
                 prev_status = StatusType.ACTIVE;

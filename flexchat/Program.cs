@@ -51,6 +51,8 @@ namespace flexchat
         public static Button remfr = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button accreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button cancelreq = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button createconv = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button chgmode;
 
         public static Button convmenu = new Button("", 75, 75, StatusType.BLOCKED);
         public static Button chgtitle = new Button("", 250, 50, StatusType.BLOCKED);
@@ -59,9 +61,9 @@ namespace flexchat
         private static int nResults = 0;
         private static bool search = false;
 
-        private static uint mode;
+        public static uint mode;
 
-        private static int Scroll = 0;
+        public static int Scroll = 0;
 
         static void Main()
         {
@@ -78,6 +80,7 @@ namespace flexchat
             buttons.Add(remfr);
             buttons.Add(accreq);
             buttons.Add(cancelreq);
+            buttons.Add(createconv);
 
             buttons.Add(convmenu);
             buttons.Add(chgtitle);
@@ -101,7 +104,7 @@ namespace flexchat
             nw = new Thread(Client.WaitForResponse);
             nw.Start();
 
-            TextBox loginInput = new TextBox(441, 66, 40, Content.LoginTextbox, Content.LoginTextbox, 65, new Color(80, 72, 153, 255));
+            TextBox loginInput = new TextBox(441, 66, 40, Content.LoginTextbox, Content.LoginTextbox, 65, Content.color1);
             loginInput.textLengthBound = 18;
             loginInput.SpacebarAllowed = false;
             loginInput.symbolsAllowed = false;
@@ -111,7 +114,7 @@ namespace flexchat
             TextBox msgTextBox = new TextBox(10, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
             msgTextBox.workMode = 1;
 
-            TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, new Color(80, 72, 153, 255));
+            TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, Content.color1);
             passInput.textLengthBound = 18;
             passInput.SpacebarAllowed = false;
             passInput.symbolsAllowed = false;
@@ -145,6 +148,10 @@ namespace flexchat
             cancelreq.posY = 300;
             cancelreq.LoadTextures(Content.cancelreq, Content.cancelreqS, Content.cancelreq);
 
+            createconv.posX = CHATS_WIDTH + 70;
+            createconv.posY = 400;
+            createconv.LoadTextures(Content.createconv, Content.createconvS, Content.createconv);
+
             accreq.posX = CHATS_WIDTH + 70;
             accreq.posY = 300;
             accreq.LoadTextures(Content.accreq, Content.accreqS, Content.accreq);
@@ -154,7 +161,7 @@ namespace flexchat
             chgtitle.posY = 0;
             chgtitle.LoadTextures(Content.chgtitle, Content.chgtitleS, Content.chgtitleS);
 
-            Button chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
+            chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
             chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
 
             Button SendButton = new Button("", 80, 80, StatusType.ACTIVE);
@@ -216,6 +223,7 @@ namespace flexchat
 
                     if (chgButton.Clicked())
                     {
+                        Scroll = 0;
                         mode = 1 - mode;
                         chgButton.LoadTextures(Content.chg[mode], Content.chg[mode], Content.chg[mode]);
                         submitButton.LoadTextures(Content.submitbutton[mode,0], Content.submitbutton[mode,1], Content.submitbutton[mode,0]);
@@ -275,7 +283,7 @@ namespace flexchat
                                     wnd.Draw(popa);
                                 }
                                 u.pos_x = 0;
-                                u.pos_y = Convert.ToUInt32(scr + Scroll + SEARCH_HEIGHT);
+                                u.pos_y = scr + Scroll + SEARCH_HEIGHT;
                                 int t = u.Draw(scr + Scroll + SEARCH_HEIGHT);
                                 if (t == 0) break;
                                 else scr += t;
@@ -296,7 +304,7 @@ namespace flexchat
                                 wnd.Draw(popa);
                             }
                             u.pos_x = 0;
-                            u.pos_y = Convert.ToUInt32(scr + Scroll + SEARCH_HEIGHT);
+                            u.pos_y = scr + Scroll + SEARCH_HEIGHT;
                             int t = u.Draw(scr + Scroll + SEARCH_HEIGHT);
                             if (t == 0) break;
                             else scr += t;
@@ -313,7 +321,7 @@ namespace flexchat
                             {
                                 f.changeStatus(StatusType.BLOCKED);
                             }
-                        }
+                        } 
                         chgmode.textures[0] = Content.chgmode[mode];
                         chgmode.textures[1] = Content.chgmode[mode];
                         chgmode.textures[2] = Content.chgmode[mode];
@@ -373,7 +381,6 @@ namespace flexchat
 
                     if (SendButton.Clicked())
                     {
-                        int conv_id = -1;
                         foreach (Conversations c in convs)
                         {
                             if (c.status == StatusType.BLOCKED)
@@ -693,8 +700,8 @@ namespace flexchat
                                         p++;
                                     }
                                     p++;
-                                    int nmsgs = int.Parse(s);
-                                    for (int counter = 0; counter < nmsgs; counter++)
+                                    int nupd = int.Parse(s);
+                                    for (int i = 0; i < nupd; i++)
                                     {
                                         s = "";
                                         while (respond[p] != 0)
@@ -703,48 +710,7 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        int msgidn = int.Parse(s);
-                                        s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        int senderid = int.Parse(s);
-                                        s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        int convid = int.Parse(s);
-                                        s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        string txt = s;
-                                        s = "";
-                                        while (respond[p] != 0)
-                                        {
-                                            s += respond[p];
-                                            p++;
-                                        }
-                                        p++;
-                                        DateTime timesent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.CurrentCulture);
-                                        s = "";
-                                        foreach (Conversations c in convs)
-                                        {
-                                            if (c.id == convid)
-                                            {
-                                                c.AddMessage(msgidn, senderid, convid, txt, timesent);
-                                                break;
-                                            }
-                                        }
+                                        ParseUpdate(s);
                                     }
                                     break;
                                 case 7:
@@ -771,10 +737,60 @@ namespace flexchat
                                             {
                                                 if (c.messages[i].id == -Resp[it].id)
                                                 {
-                                                    c.id = msgid;
+                                                    c.messages[i].id = msgid;
                                                     break;
                                                 }
                                             }
+                                        }
+                                    }
+                                    break;
+                                case 8:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int newmsgid = int.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int newmsgsenderid = int.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int newmsgconvid = int.Parse(s);
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    string newmsgtxt = s;
+                                    s = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        s += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    DateTime newmsgsent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                    foreach (Conversations c in convs)
+                                    {
+                                        if (c.id == newmsgconvid)
+                                        {
+                                            c.AddMessage(newmsgid, newmsgsenderid, newmsgconvid, newmsgtxt, newmsgsent);
+                                            break;
                                         }
                                     }
                                     break;
@@ -1021,6 +1037,22 @@ namespace flexchat
                                         }
                                     }
                                     break;
+                                case 300:
+                                    s = "";
+                                    while (respond[p] != 0)
+                                        s += respond[p++];
+                                    p++;
+                                    int newconvid = int.Parse(s);
+                                    foreach (Conversations c in convs)
+                                    {
+                                        c.status = StatusType.ACTIVE;
+                                    }
+                                    Conversations newc = new Conversations(newconvid);
+                                    convs.Add(newc);
+                                    newc.RequestData(Client);
+                                    newc.status = StatusType.ACTIVE;
+                                    ConvSelected = newc.id;
+                                    break;
                             }
                         }
                         toDelete.Add(Resp[it]);
@@ -1045,8 +1077,7 @@ namespace flexchat
             if (urgent || T >= U)
             {
                 UpdateTime = DateTime.Now;
-                string request = LastMessageTime.ToString("yyyy-MM-dd HH:mm:ss") + Convert.ToString((char)0);
-                Client.SendData(request, 6);
+                Client.SendData("", 6);
                 UpdateTime = DateTime.Now;
             }
         }
@@ -1115,7 +1146,7 @@ namespace flexchat
                     }
                 }
             }
-            Me.pos_y = wnd.Size.Y - Me.photo_size - 10;
+            Me.pos_y = Convert.ToInt32(wnd.Size.Y - Me.photo_size - 10);
             Me.pos_x = 0;
             Me.Update(args);
         }
@@ -1145,7 +1176,10 @@ namespace flexchat
             {
                 frreq.Status = StatusType.BLOCKED;
                 remfr.Status = StatusType.BLOCKED;
+
                 Me.Update(args);
+                if (args.Y > wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY)
+                    return;
                 if (search)
                 {
                     foreach (Users u in users)
@@ -1158,6 +1192,15 @@ namespace flexchat
                 {
                     if (mode == 0)
                     {
+                        frreq.Status = StatusType.BLOCKED;
+                        remfr.Status = StatusType.BLOCKED;
+                        cancelreq.Status = StatusType.BLOCKED;
+                        accreq.Status = StatusType.BLOCKED;
+                        createconv.Status = StatusType.BLOCKED;
+                        foreach (Users u in users)
+                        {
+                            u.status = StatusType.ACTIVE;
+                        }
                         foreach (Conversations c in convs)
                         {
                             c.Update(args);
@@ -1165,12 +1208,46 @@ namespace flexchat
                     }
                     else
                     {
+                        foreach (Conversations c in convs)
+                        {
+                            c.status = StatusType.ACTIVE;
+                        }
+                        convmenu.Status = StatusType.BLOCKED;
+                        chgtitle.Status = StatusType.BLOCKED;
                         foreach (Users u in users)
                         {
                             u.Update(args);
                         }
                     }
                 }
+            }
+        }
+
+        private static void ParseUpdate(string upd)
+        {
+            string s = "";
+            int p = 0;
+            while (upd[p] != ' ')
+                s += upd[p++];
+            p++;
+            int updcode = int.Parse(s);
+            s = "";
+            switch (updcode)
+            {
+                case 1:
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int newmsgid = int.Parse(s);
+                    Client.SendData(Convert.ToString(newmsgid), 8);
+                    break;
+                case 2:
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int newconvid = int.Parse(s);
+                    Conversations c = new Conversations(newconvid);
+                    c.RequestData(Client);
+                    convs.Add(c);
+                    break;
             }
         }
 
@@ -1189,14 +1266,44 @@ namespace flexchat
             {
                 if (mode == 0)
                 {
-                    if (convs.Count == 0) return;
-                    Scroll += -10 * Convert.ToInt32(e.Delta);
-                    if (Scroll < 0) Scroll = 0;
-                    if (convs.Count < wnd.Size.Y / convs[0].DSize()) Scroll = 0;
+                    if (e.Delta > 0)
+                    {
+                        Scroll += 30;
+                        if (Scroll > 0)
+                            Scroll = 0;
+                    }
                     else
                     {
-                        if (Scroll > convs.Count * convs[0].DSize() - wnd.Size.Y)
-                            Scroll = convs.Count * convs[0].DSize() - Convert.ToInt32(wnd.Size.Y);
+                        if (convs.Count >= 7)
+                        {
+                            int sum = SEARCH_HEIGHT + convs.Count * 80;
+                            Scroll -= 30;
+                            if (sum + Scroll < wnd.Size.Y - 125)
+                            {
+                                Scroll = Convert.ToInt32(wnd.Size.Y - 125 - sum);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (e.Delta < 0)
+                    {
+                        if (users.Count >= 7)
+                        {
+                            int sum = SEARCH_HEIGHT + users.Count * 80;
+                            Scroll += 30;
+                            if (sum - Scroll < wnd.Size.Y - 125)
+                            {
+                                Scroll = Convert.ToInt32(sum - wnd.Size.Y + 125);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Scroll -= 30;
+                        if (Scroll < 0)
+                            Scroll = 0;
                     }
                 }
             }
