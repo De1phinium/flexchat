@@ -81,7 +81,7 @@ namespace flexchat
 
         string GetSenderName(int msgid)
         {
-            string s = "";
+            string s = "\0";
             if (messages[msgid].sender_id == Program.Me.ID)
                 s = "You";
             else foreach (Users u in Program.users)
@@ -92,7 +92,7 @@ namespace flexchat
                         break;
                     }
             }
-            if (s == "")
+            if (s == "\0")
             {
                 Users user = new Users("", messages[msgid].sender_id);
                 Program.users.Add(user);

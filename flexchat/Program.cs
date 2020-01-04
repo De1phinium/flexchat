@@ -1234,19 +1234,85 @@ namespace flexchat
             s = "";
             switch (updcode)
             {
-                case 1:
+                case 1: // New message
                     while (upd[p] != ' ')
                         s += upd[p++];
                     int newmsgid = int.Parse(s);
                     Client.SendData(Convert.ToString(newmsgid), 8);
                     break;
-                case 2:
+                case 2: //Conversation created
                     while (upd[p] != ' ')
                         s += upd[p++];
                     int newconvid = int.Parse(s);
                     Conversations c = new Conversations(newconvid);
                     c.RequestData(Client);
                     convs.Add(c);
+                    break;
+                case 3: //Removed as a friend
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int nolongerfriend = int.Parse(s);
+                    for (int i = 0; i < friends.Count; i++)
+                    {
+                        if (friends[i] == nolongerfriend)
+                        {
+                            friends.Remove(friends[i]);
+                            break;
+                        }
+                    }
+                    foreach (Users u in users)
+                    {
+                        if (u.ID == nolongerfriend)
+                        {
+                            u.friend = false;
+                            break;
+                        }
+                    }
+                    break;
+                case 4: // Accept the request
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int newfriendid = int.Parse(s);
+                    friends.Add(newfriendid);
+                    foreach (Users u in users)
+                    {
+                        if (u.ID == newfriendid)
+                        {
+                            u.reqto = false;
+                            u.reqtoid = -1;
+                            u.friend = true;
+                            break;
+                        }
+                    }
+                    break;
+                case 5: // New request
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    p++;
+                    int nreqid = int.Parse(s);
+                    s = "";
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int from = int.Parse(s);
+                    FriendRequest newreq = new FriendRequest();
+                    newreq.id = nreqid;
+                    newreq.from = from;
+                    newreq.hidden = false;
+                    newreq.Make();
+                    frreqs.Add(newreq);
+                    break;
+                case 6: // Cancel request
+                    while (upd[p] != ' ')
+                        s += upd[p++];
+                    int cancelreqid = int.Parse(s);
+                    for (int i = 0; i < frreqs.Count; i++)
+                    {
+                        if (frreqs[i].id == cancelreqid)
+                        {
+                            frreqs.Remove(frreqs[i]);
+                            break;
+                        }
+                    }
                     break;
             }
         }

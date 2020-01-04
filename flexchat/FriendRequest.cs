@@ -23,7 +23,7 @@ namespace flexchat
         {
             if (ycoor > -50 && ycoor < Program.wnd.Size.Y)
             {
-                string login = "";
+                string login = "\0";
                 foreach (Users u in Program.users)
                 {
                     if (u.ID == from)
@@ -32,7 +32,7 @@ namespace flexchat
                         break;
                     }
                 }
-                if (login != "")
+                if (login != "\0")
                 {
                     changeStatus(StatusType.ACTIVE);
                     Text text = new Text();
