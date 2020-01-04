@@ -100,7 +100,7 @@ namespace flexchat
             err = new Error(20, Color.Red);
             err.Clear();
 
-            Client = new Network("localhost", 8081);
+            Client = new Network("localhost", 8081); 
             nw = new Thread(Client.WaitForResponse);
             nw.Start();
 
@@ -1178,8 +1178,6 @@ namespace flexchat
                 remfr.Status = StatusType.BLOCKED;
 
                 Me.Update(args);
-                if (args.Y > wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY)
-                    return;
                 if (search)
                 {
                     foreach (Users u in users)
