@@ -35,7 +35,7 @@ namespace flexchat
 
         public static Network Client;
 
-        private static Thread nw;
+        public static Thread nw;
 
         private static DateTime UpdateTime;
         public static DateTime LastMessageTime;
@@ -52,6 +52,7 @@ namespace flexchat
         public static Button accreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button cancelreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button createconv = new Button("", 384, 60, StatusType.BLOCKED);
+        public static Button chgphoto = new Button("", 60, 60, StatusType.BLOCKED);
         public static Button chgmode;
 
         public static Button convmenu = new Button("", 75, 75, StatusType.BLOCKED);
@@ -61,12 +62,22 @@ namespace flexchat
         private static int nResults = 0;
         private static bool search = false;
 
+        public static bool VoiceRecording = false;
+        public static bool VoiceRecordingAvailable = false;
+        public static bool StopRecording = false;
+        public static bool SendingVoice = false;
+
         public static uint mode;
 
         public static int Scroll = 0;
 
         static void Main()
         {
+
+            VoiceRecordingAvailable = true;
+
+            Audio recorder = new Audio("temp.wav");
+
             LastMessageTime = DateTime.ParseExact("2000-01-01 01:01:01", "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
 
             Resp = new List<Network.tRequest>();
@@ -81,6 +92,7 @@ namespace flexchat
             buttons.Add(accreq);
             buttons.Add(cancelreq);
             buttons.Add(createconv);
+            buttons.Add(chgphoto);
 
             buttons.Add(convmenu);
             buttons.Add(chgtitle);
@@ -111,7 +123,16 @@ namespace flexchat
             loginInput.defaultString = "login";
             textBoxes.Add(loginInput);
 
-            TextBox msgTextBox = new TextBox(10, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
+            Button mic = new Button("", 80, 80, StatusType.BLOCKED);
+            buttons.Add(mic);
+            mic.LoadTextures(Content.mic, Content.micS, Content.mic);
+            mic.posX = CHATS_WIDTH + 10;
+            Button stop = new Button("", 80, 80, StatusType.BLOCKED);
+            buttons.Add(stop);
+            stop.LoadTextures(Content.stop, Content.stopS, Content.stop);
+            stop.posX = CHATS_WIDTH + 10;
+
+            TextBox msgTextBox = new TextBox(90, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
             msgTextBox.workMode = 1;
 
             TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, Content.color1);
@@ -147,6 +168,10 @@ namespace flexchat
             cancelreq.posX = CHATS_WIDTH + 70;
             cancelreq.posY = 300;
             cancelreq.LoadTextures(Content.cancelreq, Content.cancelreqS, Content.cancelreq);
+
+            chgphoto.posX = CHATS_WIDTH + 295;
+            chgphoto.posY = 210;
+            chgphoto.LoadTextures(Content.chgphoto, Content.chgphotoS, Content.chgphoto);
 
             createconv.posX = CHATS_WIDTH + 70;
             createconv.posY = 400;
@@ -330,12 +355,53 @@ namespace flexchat
                     chgmode.posY = wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY;
                     chgmode.Draw();
 
+                    if (StopRecording)
+                    {
+                        StopRecording = false;
+                        if (VoiceRecording)
+                        {
+                            recorder.StopRecording();
+                            VoiceRecording = false;
+                            stop.Status = StatusType.BLOCKED;
+                        }
+                    }
+
                     if (ConvSelected >= 0)
                     {
-                        msgTextBox.posX = CHATS_WIDTH + 10;
-                        msgTextBox.posY = wnd.Size.Y - 80;
+                        msgTextBox.posX = CHATS_WIDTH + 90;
+                        msgTextBox.posY = wnd.Size.Y - 81;
+                        msgTextBox.sizeY = 81;
                         msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 10;
                         msgTextBox.Draw();
+
+                        if (VoiceRecording)
+                        {
+                            if (stop.Status == StatusType.BLOCKED)
+                                stop.Status = StatusType.ACTIVE;
+                            stop.posY = wnd.Size.Y - 80;
+                            stop.Draw();
+                            if (stop.Clicked())
+                            {
+                                recorder.StopRecording();
+                                Client.SendVoice();
+                                VoiceRecording = false;
+                                stop.Status = StatusType.BLOCKED;
+                            }
+                        }
+                        else
+                        {
+                            if (mic.Status == StatusType.BLOCKED)
+                                mic.Status = StatusType.ACTIVE;
+                            mic.posY = wnd.Size.Y - 80;
+                            mic.Draw();
+                            if (mic.Clicked() && VoiceRecordingAvailable)
+                            {
+                                recorder.StartRecording();
+                                VoiceRecording = true;
+                                mic.Status = StatusType.BLOCKED;
+                            }
+                        }
+
                         RectangleShape liniya = new RectangleShape(new SFML.System.Vector2f(msgTextBox.sizeX, 1));
                         liniya.Position = new SFML.System.Vector2f(msgTextBox.posX, msgTextBox.posY);
                         liniya.FillColor = Content.color1;
@@ -385,7 +451,7 @@ namespace flexchat
                         {
                             if (c.status == StatusType.BLOCKED)
                             {
-                                Client.SendMessage(c, msgTextBox.typed);
+                                Client.SendMessage(c, msgTextBox.typed, "0" + Convert.ToString((char)(0)));
                                 break;
                             }
                         }
@@ -679,12 +745,31 @@ namespace flexchat
                                         DateTime msgSent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                                         int last = convs.Count;
                                         int curc = 0;
+                                        string att = "";
+                                        while (respond[p] != 0)
+                                        {
+                                            att += respond[p];
+                                            p++;
+                                        }
+                                        p++;
+                                        int natts = int.Parse(att);
+                                        att += respond[p - 1];
+                                        for (int i = 0; i < natts; i++)
+                                        {
+                                            while (respond[p] != 0)
+                                            {
+                                                att += respond[p];
+                                                p++;
+                                            }
+                                            att += respond[p];
+                                            p++;
+                                        }
                                         foreach (Conversations c in convs)
                                         {
                                             curc++;
                                             if (c.id == convID)
                                             {
-                                                c.AddMessage(m_id, sender_id, convID, msgtext, msgSent);
+                                                c.AddMessage(m_id, sender_id, convID, msgtext, msgSent, att);
                                                 if (curc == last)
                                                     UpdAllowed = true;
                                                 break;
@@ -785,11 +870,30 @@ namespace flexchat
                                     }
                                     p++;
                                     DateTime newmsgsent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                    string att2 = "";
+                                    while (respond[p] != 0)
+                                    {
+                                        att2 += respond[p];
+                                        p++;
+                                    }
+                                    p++;
+                                    int natts2 = int.Parse(att2);
+                                    att2 += respond[p - 1];
+                                    for (int i = 0; i < natts2; i++)
+                                    {
+                                        while (respond[p] != 0)
+                                        {
+                                            att2 += respond[p];
+                                            p++;
+                                        }
+                                        att2 += respond[p];
+                                        p++;
+                                    }
                                     foreach (Conversations c in convs)
                                     {
                                         if (c.id == newmsgconvid)
                                         {
-                                            c.AddMessage(newmsgid, newmsgsenderid, newmsgconvid, newmsgtxt, newmsgsent);
+                                            c.AddMessage(newmsgid, newmsgsenderid, newmsgconvid, newmsgtxt, newmsgsent, att2);
                                             break;
                                         }
                                     }
@@ -1053,6 +1157,30 @@ namespace flexchat
                                     newc.status = StatusType.ACTIVE;
                                     ConvSelected = newc.id;
                                     break;
+                                case 999:
+                                    string filename = "";
+                                    while (respond[p] != 0)
+                                        filename += respond[p++];
+                                    p++;
+                                    string _fileid = "";
+                                    while (respond[p] != 0)
+                                        _fileid += respond[p++];
+                                    int fileid = int.Parse(_fileid);
+                                    if (filename == "tosend.wav")
+                                    {
+                                        string text = msgTextBox.typed;
+                                        if (text == "")
+                                            text = " ";
+                                        foreach (Conversations c in convs)
+                                        {
+                                            if (c.status == StatusType.BLOCKED)
+                                            {
+                                                Client.SendMessage(c, text, "1" + Convert.ToString((char)(0)) + _fileid);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    break;
                             }
                         }
                         toDelete.Add(Resp[it]);
@@ -1190,6 +1318,7 @@ namespace flexchat
                 {
                     if (mode == 0)
                     {
+                        chgphoto.Status = StatusType.BLOCKED;
                         frreq.Status = StatusType.BLOCKED;
                         remfr.Status = StatusType.BLOCKED;
                         cancelreq.Status = StatusType.BLOCKED;

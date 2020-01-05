@@ -1,5 +1,7 @@
 ﻿using System;
 using SFML.Graphics;
+using System.Windows.Forms;
+using System.IO;
 
 namespace flexchat
 {
@@ -18,7 +20,7 @@ namespace flexchat
 
         private string login;
         private int id;
-        public int photo_id = -1;
+        public int photo_id = -2;
         private StatusType prev_status;
         public StatusType status;
         public bool friend = false;
@@ -180,6 +182,16 @@ namespace flexchat
                         }
                     }
                 }
+                else
+                {
+                    if (Program.chgphoto.Status == StatusType.BLOCKED)
+                        Program.chgphoto.Status = StatusType.ACTIVE;
+                    Program.chgphoto.Draw();
+                    if (Program.chgphoto.Clicked())
+                    {
+
+                    }
+                }
 
                 if (text_id != -1)
                 {
@@ -216,6 +228,8 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                if (id == Program.Me.id)
+                    Program.chgphoto.Status = StatusType.ACTIVE;
                 Program.createconv.Status = StatusType.ACTIVE;
                 Program.Client.SendData(Convert.ToString(2) + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
                 if (friend)
@@ -243,6 +257,8 @@ namespace flexchat
             }
             else
             {
+                if (id == Program.Me.id)
+                    Program.chgphoto.Status = StatusType.BLOCKED;
                 if (status == StatusType.BLOCKED)
                     Program.createconv.Status = StatusType.BLOCKED;
                 if (Program.UserSelected == id)

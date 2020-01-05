@@ -20,7 +20,7 @@ namespace flexchat
         public SortedSet<int> FilesAsked = new SortedSet<int>();
 
         private TcpClient tcpClient;
-        private NetworkStream netStream;
+        public NetworkStream netStream;
         private BinaryReader reader;
         private BinaryWriter writer;
 
@@ -58,7 +58,7 @@ namespace flexchat
             {
                 prefix = Convert.ToString((char)1) + Convert.ToString(Program.session_key) + Convert.ToString((char)0) + Convert.ToString(Program.Me.ID) + Convert.ToString((char)0);
             }
-            data = prefix + Convert.ToString(t.id) + Convert.ToString((char)0) + Convert.ToString(mode) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
+            data = Convert.ToString('r') + prefix + Convert.ToString(t.id) + Convert.ToString((char)0) + Convert.ToString(mode) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
             byte[] send = Encoding.ASCII.GetBytes(data + "\n");
             netStream.Write(send, 0, send.Length);
             netStream.Flush();
@@ -82,12 +82,33 @@ namespace flexchat
             }
         }
 
-        public void SendMessage(Conversations c, string text)
+        public void SendVoice()
         {
-            string data = Convert.ToString(c.id) + Convert.ToString((char)0) + text;
+            long size = new FileInfo("tosend.wav").Length;
+            Program.SendingVoice = true;
+            string prefix = "ftosend.wav " + size.ToString() + " " + '\n';
+            using (var reader = new StreamReader("tosend.wav"))
+            {
+                char[] buffer = new char[size + prefix.Length];
+                for (int i = 0; i < prefix.Length; i++)
+                    buffer[i] = prefix[i];
+                reader.Read(buffer, prefix.Length, Convert.ToInt32(size));
+                byte[] byteArray = new byte[buffer.Length];
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    byteArray[i] = (byte)(buffer[i]);
+                }
+                netStream.Write(byteArray, 0, byteArray.Length);
+                netStream.Flush();
+            }
+        }
+
+        public void SendMessage(Conversations c, string text, string att)
+        {
+            string data = Convert.ToString(c.id) + Convert.ToString((char)0) + text + Convert.ToString((char)0) + att;
             uint req_id = SendData(data, 7);
             Program.UpdateData(true);
-            c.AddMessage(-1 * Convert.ToInt32(req_id), Program.Me.ID, c.id, text, DateTime.Now);
+            c.AddMessage(-1 * Convert.ToInt32(req_id), Program.Me.ID, c.id, text, DateTime.Now, att);
         }
 
         public void WaitForResponse()
@@ -157,7 +178,7 @@ namespace flexchat
                 {
                     continue;
                 }
-                if (f)
+                if (f && data.Length > 0)
                 {
                     int p = 0;
                     while (data[p] != 0)

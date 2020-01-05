@@ -57,12 +57,25 @@ namespace flexchat
             Client.SendData(data, 4);
         }
 
-        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent)
+        public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent, string att)
         {
             Message msg = new Message(id, sender_id, conv_id, text, sent);
             if (msg.sent > Program.LastMessageTime)
             {
                 Program.LastMessageTime = msg.sent;
+            }
+            string s = "";
+            int p = 0;
+            while (att[p] != 0)
+                s += att[p++];
+            p++;
+            int natt = int.Parse(s);
+            for (int i = 0; i < natt; i++)
+            {
+                s = "";
+                while (att[p] != 0)
+                    s += att[p++];
+                msg.AddAtt(int.Parse(s));
             }
             if (messages.Count == 0)
                 messages.Add(msg);
@@ -275,6 +288,10 @@ namespace flexchat
         {
             if (e.Button == SFML.Window.Mouse.Button.Left && status == StatusType.SELECTED)
             {
+                if (status != StatusType.BLOCKED)
+                {
+                    Program.StopRecording = true;
+                }
                 Program.SmthSelected = true;
                 prev_status = StatusType.BLOCKED;
                 status = prev_status;

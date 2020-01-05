@@ -58,6 +58,12 @@ namespace flexchat
         public static Texture chgtitleS;
         public static Texture createconv;
         public static Texture createconvS;
+        public static Texture chgphoto;
+        public static Texture chgphotoS;
+        public static Texture mic;
+        public static Texture micS;
+        public static Texture stop;
+        public static Texture stopS;
 
         public static Color color1;
         public static Color color2;
@@ -233,6 +239,12 @@ namespace flexchat
                 chgtitleS = new Texture(CONTENT_DIR + "chgtitleS.png");
                 createconv = new Texture(CONTENT_DIR + "createconv.png");
                 createconvS = new Texture(CONTENT_DIR + "createconvS.png");
+                chgphoto = new Texture(CONTENT_DIR + "chgphoto.png");
+                chgphotoS = new Texture(CONTENT_DIR + "chgphotoS.png");
+                mic = new Texture(CONTENT_DIR + "mic.png");
+                micS = new Texture(CONTENT_DIR + "micS.png");
+                stop = new Texture(CONTENT_DIR + "stop.png");
+                stopS = new Texture(CONTENT_DIR + "stopS.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -244,6 +256,12 @@ namespace flexchat
                 color1 = new Color(250, 250, 250);
                 color2 = new Color(6, 110, 119);
 
+                mic.Smooth = true;
+                micS.Smooth = true;
+                stop.Smooth = true;
+                stopS.Smooth = true;
+                chgphoto.Smooth = true;
+                chgphotoS.Smooth = true;
                 createconv.Smooth = true;
                 createconvS.Smooth = true;
                 convmenu.Smooth = true;

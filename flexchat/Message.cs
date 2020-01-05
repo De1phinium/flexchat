@@ -1,5 +1,6 @@
 ﻿using System;
 using SFML.Graphics;
+using System.Collections.Generic;
 
 namespace flexchat
 {
@@ -18,6 +19,7 @@ namespace flexchat
         public int conv_id;
         public DateTime sent;
         public string text;
+        public List<int> Attachments;
 
         public int min(int a, int b)
         {
@@ -66,9 +68,13 @@ namespace flexchat
                 }
             if (photoid == -1)
             {
-                Users user = new Users("", sender_id);
-                Program.users.Add(user);
-                user.RequestData(Program.Client);
+                if (photoid != -2)
+                {
+                    Users user = new Users("", sender_id);
+                    user.photo_id = -2;
+                    Program.users.Add(user);
+                    user.RequestData(Program.Client);
+                }
             }
             else
             {
@@ -174,11 +180,17 @@ namespace flexchat
         }
         public Message(int id, int sender_id, int conv_id, string text, DateTime sent)
         {
+            Attachments = new List<int>();
             this.id = id;
             this.sender_id = sender_id;
             this.conv_id = conv_id;
             this.text = text;
             this.sent = sent;
+        }
+
+        public void AddAtt(int id)
+        {
+            Attachments.Add(id);
         }
 
         public string GetText()
