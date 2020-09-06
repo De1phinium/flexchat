@@ -47,6 +47,8 @@ namespace flexchat
         public static List<FriendRequest> frreqs;
         public static bool SmthSelected = false;
 
+        public static Button friend_req_list = new Button("", CHATS_WIDTH, 30, StatusType.ACTIVE);
+        public static Button prmsg = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button frreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button remfr = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button accreq = new Button("", 384, 60, StatusType.BLOCKED);
@@ -87,6 +89,8 @@ namespace flexchat
             frreqs = new List<FriendRequest>();
             searchResults = new SortedSet<int>();
 
+            buttons.Add(friend_req_list);
+            buttons.Add(prmsg);
             buttons.Add(frreq);
             buttons.Add(remfr);
             buttons.Add(accreq);
@@ -132,7 +136,7 @@ namespace flexchat
             stop.LoadTextures(Content.stop, Content.stopS, Content.stop);
             stop.posX = CHATS_WIDTH + 10;
 
-            TextBox msgTextBox = new TextBox(90, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
+            TextBox msgTextBox = new TextBox(10, 80, 46, Content.MessageTextbox, Content.MessageTextbox, 15, Content.color1);
             msgTextBox.workMode = 1;
 
             TextBox passInput = new TextBox(441, 66, 40, Content.PassTextbox, Content.PassTextbox, 65, Content.color1);
@@ -157,6 +161,10 @@ namespace flexchat
             submitButton.textSize = 30;
             buttons.Add(submitButton);
 
+            friend_req_list.posX = 0;
+            friend_req_list.posY = (uint)SEARCH_HEIGHT + 3;
+            friend_req_list.LoadTextures(Content.friend_request_list, Content.friend_request_list, Content.friend_request_listB);
+
             frreq.posX = CHATS_WIDTH + 70;
             frreq.posY = 300;
             frreq.LoadTextures(Content.frreq, Content.frreqS, Content.frreq);
@@ -173,8 +181,12 @@ namespace flexchat
             chgphoto.posY = 210;
             chgphoto.LoadTextures(Content.chgphoto, Content.chgphotoS, Content.chgphoto);
 
+            prmsg.posX = CHATS_WIDTH + 70;
+            prmsg.posY = 370;
+            prmsg.LoadTextures(Content.prMsg, Content.prMsgS, Content.prMsg);
+
             createconv.posX = CHATS_WIDTH + 70;
-            createconv.posY = 400;
+            createconv.posY = 440;
             createconv.LoadTextures(Content.createconv, Content.createconvS, Content.createconv);
 
             accreq.posX = CHATS_WIDTH + 70;
@@ -279,20 +291,28 @@ namespace flexchat
                         }
                         else
                         {
-                            foreach (FriendRequest f in frreqs)
+                            scr = (int)friend_req_list.sizeY + 4;
+                            friend_req_list.Draw();
+                            if (friend_req_list.Clicked())
+                                friend_req_list.Swap();
+                            if (friend_req_list.SwapCheck())
                             {
-                                if (!f.hidden)
+                                foreach (FriendRequest f in frreqs)
                                 {
-                                    f.changeStatus(StatusType.ACTIVE);
-                                    scr += f.Draw(scr + Scroll + SEARCH_HEIGHT);
-                                    if (f.Deny.Clicked())
+                                    if (!f.hidden)
                                     {
-                                        f.hidden = true;
-                                        Client.SendData("1" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
-                                    } else if (f.Accept.Clicked())
-                                    {
-                                        f.hidden = true;
-                                        Client.SendData("0" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
+                                        f.changeStatus(StatusType.ACTIVE);
+                                        scr += f.Draw(scr + Scroll + SEARCH_HEIGHT);
+                                        if (f.Deny.Clicked())
+                                        {
+                                            f.hidden = true;
+                                            Client.SendData("1" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
+                                        }
+                                        else if (f.Accept.Clicked())
+                                        {
+                                            f.hidden = true;
+                                            Client.SendData("0" + Convert.ToString((char)0) + Convert.ToString(f.id), 101);
+                                        }
                                     }
                                 }
                             }
@@ -371,9 +391,10 @@ namespace flexchat
                         msgTextBox.posX = CHATS_WIDTH + 90;
                         msgTextBox.posY = wnd.Size.Y - 81;
                         msgTextBox.sizeY = 81;
-                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 10;
+                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 90;
                         msgTextBox.Draw();
 
+                        
                         if (VoiceRecording)
                         {
                             if (stop.Status == StatusType.BLOCKED)
@@ -402,8 +423,8 @@ namespace flexchat
                             }
                         }
 
-                        RectangleShape liniya = new RectangleShape(new SFML.System.Vector2f(msgTextBox.sizeX, 1));
-                        liniya.Position = new SFML.System.Vector2f(msgTextBox.posX, msgTextBox.posY);
+                        RectangleShape liniya = new RectangleShape(new SFML.System.Vector2f(msgTextBox.sizeX + mic.sizeX, 1));
+                        liniya.Position = new SFML.System.Vector2f(mic.posX, msgTextBox.posY);
                         liniya.FillColor = Content.color1;
                         wnd.Draw(liniya);
 
@@ -734,7 +755,10 @@ namespace flexchat
                                             p++;
                                         }
                                         p++;
-                                        string msgtext = s;
+                                        byte[] msgBytes = new byte[s.Length];
+                                        for (int i = 0; i < s.Length; i++)
+                                            msgBytes[i] = (byte)s[i];
+                                        string msgtext = System.Text.Encoding.UTF8.GetString(msgBytes);
                                         s = "";
                                         while (respond[p] != 0)
                                         {
@@ -869,6 +893,12 @@ namespace flexchat
                                         p++;
                                     }
                                     p++;
+
+                                    byte[] bytes = new byte[s.Length];
+                                    for (int i = 0; i < s.Length; i++)
+                                        bytes[i] = (byte)s[i];
+                                    s = System.Text.Encoding.UTF8.GetString(bytes);
+
                                     DateTime newmsgsent = DateTime.ParseExact(s, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                                     string att2 = "";
                                     while (respond[p] != 0)
@@ -1324,6 +1354,7 @@ namespace flexchat
                         cancelreq.Status = StatusType.BLOCKED;
                         accreq.Status = StatusType.BLOCKED;
                         createconv.Status = StatusType.BLOCKED;
+                        prmsg.Status = StatusType.BLOCKED;
                         foreach (Users u in users)
                         {
                             u.status = StatusType.ACTIVE;

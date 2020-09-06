@@ -64,6 +64,10 @@ namespace flexchat
         public static Texture micS;
         public static Texture stop;
         public static Texture stopS;
+        public static Texture prMsg;
+        public static Texture prMsgS;
+        public static Texture friend_request_list;
+        public static Texture friend_request_listB;
 
         public static Color color1;
         public static Color color2;
@@ -245,6 +249,10 @@ namespace flexchat
                 micS = new Texture(CONTENT_DIR + "micS.png");
                 stop = new Texture(CONTENT_DIR + "stop.png");
                 stopS = new Texture(CONTENT_DIR + "stopS.png");
+                prMsg = new Texture(CONTENT_DIR + "prmsg.png");
+                prMsgS = new Texture(CONTENT_DIR + "prmsgS.png");
+                friend_request_list = new Texture(CONTENT_DIR + "friend_requests_list.png");
+                friend_request_listB = new Texture(CONTENT_DIR + "friend_requests_listB.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);

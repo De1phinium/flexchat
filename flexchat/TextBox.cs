@@ -61,6 +61,10 @@ namespace flexchat
                 {
                     if (typed.Length < textLengthBound)
                     {
+                        /*byte[] symbol = System.Text.Encoding.GetEncoding(1251).GetBytes(e.Unicode);
+                        string binary = Convert.ToString(symbol[0], 2);
+                        typed += (char)symbol[0];
+                        symbol[0] = Convert.ToByte(binary, 2);*/
                         typed += e.Unicode;
                     }
                 }

@@ -44,7 +44,7 @@ namespace flexchat
             var loginbounds = login.GetLocalBounds();
             int boxwidth = PH_SIZE + Convert.ToInt32(loginbounds.Width);
             Text TimeSent = new Text();
-            TimeSent.DisplayedString = sent.ToString("U");
+            TimeSent.DisplayedString = sent.ToString("dd.MM.yyyy HH:mm:ss.fffzzz").Remove(16,13);
             TimeSent.CharacterSize = TIME_SIZE;
             TimeSent.Font = Content.font;
             TimeSent.Color = Content.color1;

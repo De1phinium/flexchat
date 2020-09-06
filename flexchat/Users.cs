@@ -103,7 +103,7 @@ namespace flexchat
             else login.Color = Content.color2;
             login.DisplayedString = Login;
             var lb = login.GetLocalBounds();
-            login.Position = new SFML.System.Vector2f(80, y + ((PHOTO_SIZE + 10) / 2) - (lb.Height / 2) - 5);
+            login.Position = new SFML.System.Vector2f(80, y + ((PHOTO_SIZE + 10) / 2) - (lb.Height / 2) - 8);
             Program.wnd.Draw(login);
 
             if (status == StatusType.BLOCKED)
@@ -111,15 +111,60 @@ namespace flexchat
                 if (id != Program.Me.ID)
                 {
                     Program.createconv.Draw();
+                    Program.prmsg.Draw();
+
+                    if (Program.prmsg.Clicked())
+                    {
+                        int convInd = -1;
+                        for (int i = 0; i < Program.convs.Count; i++)
+                        {
+                            if ((Program.convs[i].second_person == id && Program.convs[i].creator_id == Program.Me.id) || (Program.convs[i].creator_id == id && Program.convs[i].second_person == Program.Me.id))
+                            {
+                                convInd = i;
+                                Program.Scroll = 0;
+                                Program.mode = 0;
+                                Program.UserSelected = -1;
+                                Program.ConvSelected = Program.convs[convInd].id;
+                                Program.createconv.Status = StatusType.BLOCKED;
+                                Program.prmsg.Status = StatusType.BLOCKED;
+                                Program.frreq.Status = StatusType.BLOCKED;
+                                Program.accreq.Status = StatusType.BLOCKED;
+                                Program.cancelreq.Status = StatusType.BLOCKED;
+                                Program.remfr.Status = StatusType.BLOCKED;
+                                Program.convs[i].status = StatusType.BLOCKED;
+                                status = StatusType.ACTIVE;
+                                prev_status = StatusType.ACTIVE;
+                                Program.chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
+                            }
+                        }
+                        if (convInd == -1)
+                        {
+                            Program.Client.SendData(Convert.ToString(id) + Convert.ToString((char)(0)) + Convert.ToString('1'), 300);
+                            Program.createconv.Status = StatusType.BLOCKED;
+                            Program.prmsg.Status = StatusType.BLOCKED;
+                            Program.frreq.Status = StatusType.BLOCKED;
+                            Program.accreq.Status = StatusType.BLOCKED;
+                            Program.cancelreq.Status = StatusType.BLOCKED;
+                            Program.remfr.Status = StatusType.BLOCKED;
+                            status = StatusType.ACTIVE;
+                            Program.Scroll = 0;
+                            Program.mode = 0;
+                            Program.UserSelected = -1;
+                            Program.chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
+                        }
+                    }
+
                     if (Program.createconv.Clicked())
                     {
-                        Program.Client.SendData(Convert.ToString(id), 300);
+                        Program.Client.SendData(Convert.ToString(id) + Convert.ToString((char)(0)) + Convert.ToString('0'), 300);
                         Program.createconv.Status = StatusType.BLOCKED;
                         Program.frreq.Status = StatusType.BLOCKED;
+                        Program.prmsg.Status = StatusType.BLOCKED;
                         Program.accreq.Status = StatusType.BLOCKED;
                         Program.cancelreq.Status = StatusType.BLOCKED;
                         Program.remfr.Status = StatusType.BLOCKED;
                         status = StatusType.ACTIVE;
+                        prev_status = StatusType.ACTIVE;
                         Program.Scroll = 0;
                         Program.mode = 0;
                         Program.UserSelected = -1;
@@ -231,6 +276,7 @@ namespace flexchat
                 if (id == Program.Me.id)
                     Program.chgphoto.Status = StatusType.ACTIVE;
                 Program.createconv.Status = StatusType.ACTIVE;
+                Program.prmsg.Status = StatusType.ACTIVE;
                 Program.Client.SendData(Convert.ToString(2) + Convert.ToString((char)(0)) + Convert.ToString(id), 100);
                 if (friend)
                     Program.remfr.Status = StatusType.ACTIVE;
@@ -260,7 +306,10 @@ namespace flexchat
                 if (id == Program.Me.id)
                     Program.chgphoto.Status = StatusType.BLOCKED;
                 if (status == StatusType.BLOCKED)
+                {
                     Program.createconv.Status = StatusType.BLOCKED;
+                    Program.prmsg.Status = StatusType.BLOCKED;
+                }
                 if (Program.UserSelected == id)
                     Program.UserSelected = -1;
                 prev_status = StatusType.ACTIVE;

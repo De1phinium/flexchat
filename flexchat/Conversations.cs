@@ -11,6 +11,7 @@ namespace flexchat
         private const int TEXT_SIZE = 17;
         private const int offs = 5;
         private int Scroll = 0;
+        private bool blockAsking = false;
 
         public StatusType status;
         private StatusType prev_status;
@@ -59,6 +60,7 @@ namespace flexchat
 
         public void AddMessage(int id, int sender_id, int conv_id, string text, DateTime sent, string att)
         {
+            blockAsking = false;
             Message msg = new Message(id, sender_id, conv_id, text, sent);
             if (msg.sent > Program.LastMessageTime)
             {
@@ -132,13 +134,13 @@ namespace flexchat
                 photo.Radius = (PHOTO_SIZE - 6) / 2;
                 photo.Position = new SFML.System.Vector2f(10, yc + ((PHOTO_SIZE + 10) / 2) - (photo.Radius));
                 int TextureId = 0;
-                if (second_person == 0)
+                if (second_person == creator_id)
                     TextureId = Content.CachedTextureId(photo_id);
                 else
                 {
                     foreach (Users u in Program.users)
                     {
-                        if (u.ID == second_person || u.ID == creator_id)
+                        if ((u.ID == second_person || u.ID == creator_id) && u.ID != Program.Me.ID)
                         {
                             TextureId = Content.CachedTextureId(u.photo_id);
                             break;
@@ -241,18 +243,39 @@ namespace flexchat
                             Program.chgtitle.Status = StatusType.BLOCKED;
                     }
 
-                    Program.convmenu.posX = Program.wnd.Size.X - Program.convmenu.sizeX;
-                    Program.convmenu.Draw();
-                    if (Program.chgtitle.Status != StatusType.BLOCKED)
+                    if (second_person == creator_id)
                     {
-                        Program.chgtitle.posY = 75;
-                        Program.chgtitle.posX = Program.wnd.Size.X - Program.chgtitle.sizeX;
-                        Program.chgtitle.Draw();
+                        Program.convmenu.posX = Program.wnd.Size.X - Program.convmenu.sizeX;
+                        Program.convmenu.Draw();
+                        if (Program.chgtitle.Status != StatusType.BLOCKED)
+                        {
+                            Program.chgtitle.posY = 75;
+                            Program.chgtitle.posX = Program.wnd.Size.X - Program.chgtitle.sizeX;
+                            Program.chgtitle.Draw();
+                        }
                     }
 
                     Text Ttext = new Text();
                     Ttext.CharacterSize = 50;
                     Ttext.DisplayedString = title;
+                    if (second_person != creator_id)
+                    {
+                        title = "Private Conversation";
+                        int userTitleSearch = -1;
+                        if (second_person == Program.Me.ID)
+                            userTitleSearch = creator_id;
+                        else
+                            userTitleSearch = second_person;
+
+                        for (int i = 0; i < Program.users.Count; i++)
+                        {
+                            if (Program.users[i].ID == userTitleSearch)
+                            {
+                                title = Program.users[i].Login;
+                                break;
+                            }
+                        }
+                    }
                     Ttext.Position = new SFML.System.Vector2f(Program.CHATS_WIDTH + 22, 6);
                     Ttext.Font = Content.font;
                     Ttext.Color = Content.color1;
@@ -330,7 +353,13 @@ namespace flexchat
                 {
                     Scroll -= 40;
                     if (Scroll < sum + (Program.wnd.Size.Y - 170))
+                    {
                         Scroll = sum + Convert.ToInt32(Program.wnd.Size.Y - 170);
+                        if (!blockAsking)
+                        {
+                            blockAsking = true;
+                        }
+                    }
                 }
             }
         }

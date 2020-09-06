@@ -59,7 +59,11 @@ namespace flexchat
                 prefix = Convert.ToString((char)1) + Convert.ToString(Program.session_key) + Convert.ToString((char)0) + Convert.ToString(Program.Me.ID) + Convert.ToString((char)0);
             }
             data = Convert.ToString('r') + prefix + Convert.ToString(t.id) + Convert.ToString((char)0) + Convert.ToString(mode) + Convert.ToString((char)0) + data + Convert.ToString((char)0);
-            byte[] send = Encoding.ASCII.GetBytes(data + "\n");
+            byte[] send = Encoding.UTF8.GetBytes(data + "\n");
+            /*byte[] send = new byte[data.Length + 1];
+            for (int i = 0; i < data.Length; i++)
+                send[i] = (byte)data[i];
+            send[data.Length] = (byte)'\n';*/
             netStream.Write(send, 0, send.Length);
             netStream.Flush();
             return t.id;
@@ -89,7 +93,7 @@ namespace flexchat
             string prefix = "ftosend.wav " + size.ToString() + " " + '\n';
             using (var reader = new StreamReader("tosend.wav"))
             {
-                char[] buffer = new char[size + prefix.Length];
+                /*char[] buffer = new char[size + prefix.Length];
                 for (int i = 0; i < prefix.Length; i++)
                     buffer[i] = prefix[i];
                 reader.Read(buffer, prefix.Length, Convert.ToInt32(size));
@@ -99,6 +103,21 @@ namespace flexchat
                     byteArray[i] = (byte)(buffer[i]);
                 }
                 netStream.Write(byteArray, 0, byteArray.Length);
+                netStream.Flush();*/
+
+                char[] buffer = new char[size];
+                reader.Read(buffer, 0, Convert.ToInt32(size));
+                byte[] byteArray = new byte[buffer.Length + prefix.Length];
+                for (int i = 0; i < prefix.Length; i++)
+                    byteArray[i] = (byte)prefix[i];
+                string logText = "";
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    byteArray[i + prefix.Length] = (byte)buffer[i];
+                    logText += (char)byteArray[i + prefix.Length];
+                }
+                File.AppendAllText("F:/flexchat_log.txt", logText);
+                netStream.Write(byteArray, 0, byteArray.Length);
                 netStream.Flush();
             }
         }
@@ -107,6 +126,7 @@ namespace flexchat
         {
             string data = Convert.ToString(c.id) + Convert.ToString((char)0) + text + Convert.ToString((char)0) + att;
             uint req_id = SendData(data, 7);
+            //File.AppendAllText("F:/flexchat_log.txt", data);
             Program.UpdateData(true);
             c.AddMessage(-1 * Convert.ToInt32(req_id), Program.Me.ID, c.id, text, DateTime.Now, att);
         }
