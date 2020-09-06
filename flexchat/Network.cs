@@ -88,35 +88,14 @@ namespace flexchat
 
         public void SendVoice()
         {
-            long size = new FileInfo("tosend.wav").Length;
+            int size = Convert.ToInt32(new FileInfo("tosend.wav").Length);
             Program.SendingVoice = true;
-            string prefix = "ftosend.wav " + size.ToString() + " " + '\n';
-            using (var reader = new StreamReader("tosend.wav"))
+            string prefix = "ftosend.wav " + size.ToString() + " " + '\n';            using (var fin = File.OpenRead("tosend.wav"))
             {
-                /*char[] buffer = new char[size + prefix.Length];
-                for (int i = 0; i < prefix.Length; i++)
-                    buffer[i] = prefix[i];
-                reader.Read(buffer, prefix.Length, Convert.ToInt32(size));
-                byte[] byteArray = new byte[buffer.Length];
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    byteArray[i] = (byte)(buffer[i]);
-                }
-                netStream.Write(byteArray, 0, byteArray.Length);
-                netStream.Flush();*/
-
-                char[] buffer = new char[size];
-                reader.Read(buffer, 0, Convert.ToInt32(size));
-                byte[] byteArray = new byte[buffer.Length + prefix.Length];
+                byte[] byteArray = new byte[size + prefix.Length];
                 for (int i = 0; i < prefix.Length; i++)
                     byteArray[i] = (byte)prefix[i];
-                string logText = "";
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    byteArray[i + prefix.Length] = (byte)buffer[i];
-                    logText += (char)byteArray[i + prefix.Length];
-                }
-                File.AppendAllText("F:/flexchat_log.txt", logText);
+                fin.Read(byteArray, prefix.Length, size);
                 netStream.Write(byteArray, 0, byteArray.Length);
                 netStream.Flush();
             }
