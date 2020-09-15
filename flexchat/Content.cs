@@ -18,6 +18,12 @@ namespace flexchat
             public Texture texture;
         }
 
+        public struct CachedFile
+        {
+            public int FileId;
+        }
+
+
         public const uint UINT_MAX = 4294967295;
         public const string CONTENT_DIR = "..\\Content\\";
         public const string CACHE_DIR = "..\\Cache\\";
@@ -25,7 +31,8 @@ namespace flexchat
         public const int CacheSize = 128;
 
         private static tFile[] files = new tFile[128];
-        public static CachedTexture[] cache = new CachedTexture[64];
+        public static CachedTexture[] cacheIMG = new CachedTexture[64];
+        public static CachedFile[] cacheF = new CachedFile[64];
 
         public static Font font;
 
@@ -51,18 +58,75 @@ namespace flexchat
         public static Texture denybutton;
         public static Texture denybuttonS;
         public static Texture titlebox;
-        public static Texture msgbox;
         public static Texture convmenu;
         public static Texture convmenuS;
         public static Texture chgtitle;
         public static Texture chgtitleS;
         public static Texture createconv;
         public static Texture createconvS;
+        public static Texture chgphoto;
+        public static Texture chgphotoS;
+        public static Texture mic;
+        public static Texture micS;
+        public static Texture stop;
+        public static Texture stopS;
+        public static Texture prMsg;
+        public static Texture prMsgS;
+        public static Texture friend_request_list;
+        public static Texture friend_request_listB;
+        public static Texture playvoicemsg;
+        public static Texture pausevoicemsg;
+        public static Texture msgBoxCornerSW;
+        public static Texture msgBoxCornerSE;
+        public static Texture msgBoxCornerNW;
+        public static Texture msgBoxCornerNE;
 
         public static Color color1;
         public static Color color2;
 
         private static SortedSet<char> symbols = new SortedSet<char>();
+
+        public static Texture GetTexture(int cachedTextureId)
+        {
+            return cacheIMG[cachedTextureId].texture;
+        }
+
+        public static int GetFileType(int fileId)
+        {
+            int dotIndex = 0;
+            while (files[fileId].filename[dotIndex] != '.')
+                dotIndex++;
+            string format = files[fileId].filename.Substring(dotIndex + 1);
+            switch (format)
+            {
+                case "wav":
+                    return 1;
+                default:
+                    return -1;
+            }
+        }
+
+        public static string GetFilePath(int fileId)
+        {
+            return CACHE_DIR + files[fileId].filename;
+        }
+
+        public static int SearchFileInCache(int id)
+        {
+            int res = -1;
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (files[i].id == id)
+                {
+                    res = i;
+                    break;
+                }
+            }
+
+            if (res == -1) Program.Client.DownloadFile(id);
+            return res;
+        }
 
         public static int CachedTextureId(int id)
         {
@@ -71,10 +135,10 @@ namespace flexchat
             
             for (int i = 0; i < CacheSizeT; i++)
             {
-                if (cache[i].FileId >= 0 && files[cache[i].FileId].id == id)
+                if (cacheIMG[i].FileId >= 0 && files[cacheIMG[i].FileId].id == id)
                 {
                     res = i;
-                    files[cache[i].FileId].last_checked = DateTime.Now;
+                    files[cacheIMG[i].FileId].last_checked = DateTime.Now;
                     break;
                 }
             }
@@ -98,23 +162,23 @@ namespace flexchat
                     DateTime toReplaceTime = DateTime.Now;
                     for (int j = 0; j < CacheSizeT; j++)
                     {
-                        if (cache[j].FileId == -1)
+                        if (cacheIMG[j].FileId == -1)
                         {
                             toReplace = j;
                             break;
-                        } else if (files[cache[j].FileId].last_checked < toReplaceTime)
+                        } else if (files[cacheIMG[j].FileId].last_checked < toReplaceTime)
                         {
                             toReplace = j;
-                            toReplaceTime = files[cache[j].FileId].last_checked;
+                            toReplaceTime = files[cacheIMG[j].FileId].last_checked;
                         }
                     }
                     files[i].last_checked = DateTime.Now;
-                    if (cache[toReplace].texture != null)
-                        cache[toReplace].texture.Dispose();
+                    if (cacheIMG[toReplace].texture != null)
+                        cacheIMG[toReplace].texture.Dispose();
                     try
                     {
-                        cache[toReplace].texture = new Texture(CACHE_DIR + files[i].filename);
-                        cache[toReplace].FileId = i;
+                        cacheIMG[toReplace].texture = new Texture(CACHE_DIR + files[i].filename);
+                        cacheIMG[toReplace].FileId = i;
                         res = toReplace;
                     }
                     catch (Exception)
@@ -134,9 +198,9 @@ namespace flexchat
         {
             for (int i = 0; i < CacheSizeT; i++)
             {
-                if (cache[i].texture != null)
-                    cache[i].texture.Dispose();
-                cache[i].FileId = -1;
+                if (cacheIMG[i].texture != null)
+                    cacheIMG[i].texture.Dispose();
+                cacheIMG[i].FileId = -1;
             }
             for (int i = 0; i < CacheSize; i++)
             {
@@ -195,7 +259,7 @@ namespace flexchat
             }
             for (int i = 0; i < CacheSizeT; i++)
             {
-                cache[i].FileId = -1;
+                cacheIMG[i].FileId = -1;
             }
             try
             {
@@ -226,13 +290,28 @@ namespace flexchat
                 denybutton = new Texture(CONTENT_DIR + "denybutton.png");
                 denybuttonS = new Texture(CONTENT_DIR + "denybuttonS.png");
                 titlebox = new Texture(CONTENT_DIR + "titlebox.png");
-                msgbox = new Texture(CONTENT_DIR + "msgbox.png");
                 convmenu = new Texture(CONTENT_DIR + "convmenu.png");
                 convmenuS = new Texture(CONTENT_DIR + "convmenuS.png");
                 chgtitle = new Texture(CONTENT_DIR + "chgtitle.png");
                 chgtitleS = new Texture(CONTENT_DIR + "chgtitleS.png");
                 createconv = new Texture(CONTENT_DIR + "createconv.png");
                 createconvS = new Texture(CONTENT_DIR + "createconvS.png");
+                chgphoto = new Texture(CONTENT_DIR + "chgphoto.png");
+                chgphotoS = new Texture(CONTENT_DIR + "chgphotoS.png");
+                mic = new Texture(CONTENT_DIR + "mic.png");
+                micS = new Texture(CONTENT_DIR + "micS.png");
+                stop = new Texture(CONTENT_DIR + "stop.png");
+                stopS = new Texture(CONTENT_DIR + "stopS.png");
+                prMsg = new Texture(CONTENT_DIR + "prmsg.png");
+                prMsgS = new Texture(CONTENT_DIR + "prmsgS.png");
+                friend_request_list = new Texture(CONTENT_DIR + "friend_requests_list.png");
+                friend_request_listB = new Texture(CONTENT_DIR + "friend_requests_listB.png");
+                playvoicemsg = new Texture(CONTENT_DIR + "playvoicemsg.png");
+                pausevoicemsg = new Texture(CONTENT_DIR + "pausevoicemsg.png");
+                msgBoxCornerSW = new Texture(CONTENT_DIR + "msgBoxCornerSW.png");
+                msgBoxCornerSE = new Texture(CONTENT_DIR + "msgBoxCornerSE.png");
+                msgBoxCornerNW = new Texture(CONTENT_DIR + "msgBoxCornerNW.png");
+                msgBoxCornerNE = new Texture(CONTENT_DIR + "msgBoxCornerNE.png");
 
                 /*colorAlmostBlack = new Color(35, 35, 35);
                 colorDarkGray = new Color(85, 85, 85);
@@ -244,13 +323,18 @@ namespace flexchat
                 color1 = new Color(250, 250, 250);
                 color2 = new Color(6, 110, 119);
 
+                mic.Smooth = true;
+                micS.Smooth = true;
+                stop.Smooth = true;
+                stopS.Smooth = true;
+                chgphoto.Smooth = true;
+                chgphotoS.Smooth = true;
                 createconv.Smooth = true;
                 createconvS.Smooth = true;
                 convmenu.Smooth = true;
                 convmenuS.Smooth = true;
                 chgtitle.Smooth = true;
                 chgtitleS.Smooth = true;
-                msgbox.Smooth = true;
                 accbutton.Smooth = true;
                 accbuttonS.Smooth = true;
                 denybutton.Smooth = true;
@@ -277,6 +361,13 @@ namespace flexchat
                 SendButton.Smooth = true;
                 SendButton_Clicked.Smooth = true;
                 MessageTextbox.Smooth = true;
+                msgBoxCornerNE.Smooth = true;
+                msgBoxCornerNW.Smooth = true;
+                msgBoxCornerSE.Smooth = true;
+                msgBoxCornerSW.Smooth = true;
+
+                playvoicemsg.Smooth = true;
+                pausevoicemsg.Smooth = true;
 
                 font = new Font(CONTENT_DIR + "tahoma.ttf");
             }

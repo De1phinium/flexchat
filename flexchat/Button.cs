@@ -8,6 +8,7 @@ namespace flexchat
         private string text;
 
         private bool WasClicked;
+        private bool SwapFlag;
 
         private Color[] textColor;
         public uint textSize;
@@ -37,6 +38,7 @@ namespace flexchat
             this.status = status;
             textColor = new Color[3];
             WasClicked = false;
+            SwapFlag = false;
         }
 
         public void Update(MouseMoveEventArgs e)
@@ -87,6 +89,19 @@ namespace flexchat
             };
             text.Position = new SFML.System.Vector2f(pos_x + (size_x / 2) - text.DisplayedString.Length / 2 * text.CharacterSize / 2 - 4, pos_y + size_y / 2 - text.CharacterSize / 2 - 4);
             Program.wnd.Draw(text);
+        }
+
+        public void Swap()
+        {
+            SwapFlag = !SwapFlag;
+            textures[0] = textures[2];
+            textures[2] = textures[1];
+            textures[1] = textures[0];
+        }
+
+        public bool SwapCheck()
+        {
+            return SwapFlag;
         }
     }
 }
