@@ -10,7 +10,7 @@ namespace flexchat
     {
         public static uint WND_WIDTH = 720;
         public static uint WND_HEIGHT = 500;
-        public static uint CHATS_WIDTH = 260;
+        public static int CHATS_WIDTH = 260;
         public static int SEARCH_HEIGHT = 30;
 
         public static RenderWindow wnd = new RenderWindow(new VideoMode(WND_WIDTH, WND_HEIGHT), "FLEXCHAT");
@@ -25,6 +25,7 @@ namespace flexchat
 
         public static int UserSelected = -1;
         public static int ConvSelected = -1;
+        public static int VoiceMessagePlaying = -1;
 
         public Int64 SessionKey
         {
@@ -37,6 +38,8 @@ namespace flexchat
 
         public static Thread nw;
 
+        public static Audio Player;
+
         private static DateTime UpdateTime;
         public static DateTime LastMessageTime;
 
@@ -47,7 +50,7 @@ namespace flexchat
         public static List<FriendRequest> frreqs;
         public static bool SmthSelected = false;
 
-        public static Button friend_req_list = new Button("", CHATS_WIDTH, 30, StatusType.ACTIVE);
+        public static Button friend_req_list = new Button("", Convert.ToUInt32(CHATS_WIDTH), 30, StatusType.ACTIVE);
         public static Button prmsg = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button frreq = new Button("", 384, 60, StatusType.BLOCKED);
         public static Button remfr = new Button("", 384, 60, StatusType.BLOCKED);
@@ -69,6 +72,9 @@ namespace flexchat
         public static bool StopRecording = false;
         public static bool SendingVoice = false;
 
+        public static int VoiceMessageConvId = -1;
+        public static int VoiceMessageId = -1;
+
         public static uint mode;
 
         public static int Scroll = 0;
@@ -79,6 +85,7 @@ namespace flexchat
             VoiceRecordingAvailable = true;
 
             Audio recorder = new Audio("temp.wav");
+            Player = new Audio();
 
             LastMessageTime = DateTime.ParseExact("2000-01-01 01:01:01", "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -147,7 +154,7 @@ namespace flexchat
             passInput.sub = "*";
             textBoxes.Add(passInput);
 
-            TextBox SearchBox = new TextBox(CHATS_WIDTH, Convert.ToUInt32(SEARCH_HEIGHT), 22, Content.searchbox, Content.searchbox, 28, Content.color1);
+            TextBox SearchBox = new TextBox(Convert.ToUInt32(CHATS_WIDTH), Convert.ToUInt32(SEARCH_HEIGHT), 22, Content.searchbox, Content.searchbox, 28, Content.color1);
             SearchBox.textLengthBound = 18;
             SearchBox.SpacebarAllowed = false;
             SearchBox.symbolsAllowed = false;
@@ -162,7 +169,7 @@ namespace flexchat
             buttons.Add(submitButton);
 
             friend_req_list.posX = 0;
-            friend_req_list.posY = (uint)SEARCH_HEIGHT + 3;
+            friend_req_list.posY = SEARCH_HEIGHT + 3;
             friend_req_list.LoadTextures(Content.friend_request_list, Content.friend_request_list, Content.friend_request_listB);
 
             frreq.posX = CHATS_WIDTH + 70;
@@ -198,7 +205,7 @@ namespace flexchat
             chgtitle.posY = 0;
             chgtitle.LoadTextures(Content.chgtitle, Content.chgtitleS, Content.chgtitleS);
 
-            chgmode = new Button("", CHATS_WIDTH, 45, StatusType.ACTIVE);
+            chgmode = new Button("", Convert.ToUInt32(CHATS_WIDTH), 45, StatusType.ACTIVE);
             chgmode.LoadTextures(Content.chgmode[0], Content.chgmode[0], Content.chgmode[0]);
 
             Button SendButton = new Button("", 80, 80, StatusType.ACTIVE);
@@ -227,23 +234,23 @@ namespace flexchat
 
                 if (session_key == 0)
                 {
-                    err.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5;
-                    err.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize;
+                    err.posX = Convert.ToInt32((wnd.Size.X / 2) - (loginInput.sizeX / 2) + 5);
+                    err.posY = Convert.ToInt32((wnd.Size.Y / 2) - loginInput.sizeY - 60 - err.textSize);
 
-                    loginInput.posX = (wnd.Size.X / 2) - (loginInput.sizeX / 2);
-                    loginInput.posY = (wnd.Size.Y / 2) - loginInput.sizeY - 50;
+                    loginInput.posX = Convert.ToInt32((wnd.Size.X / 2) - (loginInput.sizeX / 2));
+                    loginInput.posY = Convert.ToInt32((wnd.Size.Y / 2) - loginInput.sizeY - 50);
                     loginInput.Draw();
 
-                    passInput.posX = (wnd.Size.X / 2) - (passInput.sizeX / 2);
-                    passInput.posY = (wnd.Size.Y / 2) - 30;
+                    passInput.posX = Convert.ToInt32((wnd.Size.X / 2) - (passInput.sizeX / 2));
+                    passInput.posY = Convert.ToInt32((wnd.Size.Y / 2) - 30);
                     passInput.Draw();
 
-                    submitButton.posX = (wnd.Size.X / 2) - (submitButton.sizeX / 2);
-                    submitButton.posY = (wnd.Size.Y / 2) + 100;
+                    submitButton.posX = Convert.ToInt32((wnd.Size.X / 2) - (submitButton.sizeX / 2));
+                    submitButton.posY = Convert.ToInt32((wnd.Size.Y / 2) + 100);
                     submitButton.Draw();
 
-                    chgButton.posX = (wnd.Size.X / 2) + (passInput.sizeX / 2) - (chgButton.sizeX) - 32;
-                    chgButton.posY = (wnd.Size.Y / 2) + passInput.sizeY / 2 + 7;
+                    chgButton.posX = Convert.ToInt32((wnd.Size.X / 2) + (passInput.sizeX / 2) - (chgButton.sizeX) - 32);
+                    chgButton.posY = Convert.ToInt32((wnd.Size.Y / 2) + passInput.sizeY / 2 + 7);
                     chgButton.Draw();
 
                     if (submitButton.Clicked())
@@ -372,7 +379,7 @@ namespace flexchat
                         chgmode.textures[2] = Content.chgmode[mode];
                     }
                     chgmode.posX = 0;
-                    chgmode.posY = wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY;
+                    chgmode.posY = Convert.ToInt32(wnd.Size.Y - Me.photo_size - 10 - chgmode.sizeY);
                     chgmode.Draw();
 
                     if (StopRecording)
@@ -389,9 +396,9 @@ namespace flexchat
                     if (ConvSelected >= 0)
                     {
                         msgTextBox.posX = CHATS_WIDTH + 90;
-                        msgTextBox.posY = wnd.Size.Y - 81;
+                        msgTextBox.posY = Convert.ToInt32(wnd.Size.Y - 81);
                         msgTextBox.sizeY = 81;
-                        msgTextBox.sizeX = wnd.Size.X - CHATS_WIDTH - 90;
+                        msgTextBox.sizeX = Convert.ToUInt32(wnd.Size.X - CHATS_WIDTH - 90);
                         msgTextBox.Draw();
 
                         
@@ -399,12 +406,13 @@ namespace flexchat
                         {
                             if (stop.Status == StatusType.BLOCKED)
                                 stop.Status = StatusType.ACTIVE;
-                            stop.posY = wnd.Size.Y - 80;
+                            stop.posY = Convert.ToInt32(wnd.Size.Y - 80);
                             stop.Draw();
                             if (stop.Clicked())
                             {
                                 recorder.StopRecording();
-                                Client.SendVoice();
+                                Client.SendVoice(msgTextBox.typed);
+                                msgTextBox.typed = "";
                                 VoiceRecording = false;
                                 stop.Status = StatusType.BLOCKED;
                             }
@@ -413,7 +421,7 @@ namespace flexchat
                         {
                             if (mic.Status == StatusType.BLOCKED)
                                 mic.Status = StatusType.ACTIVE;
-                            mic.posY = wnd.Size.Y - 80;
+                            mic.posY = Convert.ToInt32(wnd.Size.Y - 80);
                             mic.Draw();
                             if (mic.Clicked() && VoiceRecordingAvailable)
                             {
@@ -428,8 +436,8 @@ namespace flexchat
                         liniya.FillColor = Content.color1;
                         wnd.Draw(liniya);
 
-                        SendButton.posX = wnd.Size.X - 80;
-                        SendButton.posY = wnd.Size.Y - 80;
+                        SendButton.posX = Convert.ToInt32(wnd.Size.X - 80);
+                        SendButton.posY = Convert.ToInt32(wnd.Size.Y - 80);
                         SendButton.Draw();
                     }
 
@@ -1188,24 +1196,36 @@ namespace flexchat
                                     ConvSelected = newc.id;
                                     break;
                                 case 999:
-                                    string filename = "";
+                                    string filename = string.Empty;
                                     while (respond[p] != 0)
                                         filename += respond[p++];
                                     p++;
-                                    string _fileid = "";
+                                    string FileId = string.Empty;
                                     while (respond[p] != 0)
-                                        _fileid += respond[p++];
-                                    int fileid = int.Parse(_fileid);
+                                        FileId += respond[p++];
+                                    p++;
                                     if (filename == "tosend.wav")
                                     {
-                                        string text = msgTextBox.typed;
-                                        if (text == "")
-                                            text = " ";
-                                        foreach (Conversations c in convs)
+                                        string parseConvId = "";
+                                        int pInf = 0;
+                                        while (Resp[it].Inf[pInf] != ' ')
                                         {
-                                            if (c.status == StatusType.BLOCKED)
+                                            parseConvId += Resp[it].Inf[pInf];
+                                            pInf++;
+                                        }
+                                        pInf++;
+                                        string msgText = "";
+                                        while (pInf < Resp[it].Inf.Length)
+                                        {
+                                            msgText += Resp[it].Inf[pInf];
+                                            pInf++;
+                                        }
+                                        int convId = int.Parse(parseConvId);
+                                        for (int i = 0; i < convs.Count; i++)
+                                        {
+                                            if (convs[i].id == convId)
                                             {
-                                                Client.SendMessage(c, text, "1" + Convert.ToString((char)(0)) + _fileid);
+                                                Client.SendMessage(convs[i], msgText, "1" + Convert.ToString((char)(0)) + FileId + Convert.ToString((char)(0)));
                                                 break;
                                             }
                                         }
@@ -1294,6 +1314,8 @@ namespace flexchat
                     foreach (Conversations c in convs)
                     {
                         c.Update(args);
+                        if (ConvSelected == c.id)
+                            c.UpdateMessages(args);
                     }
                 }
                 else
@@ -1376,6 +1398,16 @@ namespace flexchat
                         {
                             u.Update(args);
                         }
+                    }
+                }
+            }
+            if (ConvSelected > 0)
+            {
+                for (int ind = 0; ind < convs.Count; ind++)
+                {
+                    if (convs[ind].id == ConvSelected)
+                    {
+                        convs[ind].UpdateMessages(args);
                     }
                 }
             }
@@ -1542,5 +1574,8 @@ namespace flexchat
                 }
             }
         }
+
+
+
     }
 }

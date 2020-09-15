@@ -90,7 +90,7 @@ namespace flexchat
             int text_id = Content.CachedTextureId(photo_id);
             if (text_id != -1)
             {
-                photo.Texture = Content.cache[text_id].texture;
+                photo.Texture = Content.GetTexture(text_id);
                 photo.Radius = (PHOTO_SIZE - 6) / 2;
                 photo.Position = new SFML.System.Vector2f(10, y + ((PHOTO_SIZE + 10) / 2) - (photo.Radius));
                 Program.wnd.Draw(photo);

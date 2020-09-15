@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System;
 
 namespace flexchat
 {
@@ -43,9 +44,9 @@ namespace flexchat
                     text.Position = new SFML.System.Vector2f(10, ycoor + 10);
                     Program.wnd.Draw(text);
                     Accept.posX = Program.CHATS_WIDTH - 100;
-                    Accept.posY = System.Convert.ToUInt32(ycoor) + 5;
+                    Accept.posY = Convert.ToInt32(Convert.ToUInt32(ycoor) + 5);
                     Deny.posX = Program.CHATS_WIDTH - 50;
-                    Deny.posY = System.Convert.ToUInt32(ycoor) + 5;
+                    Deny.posY = Convert.ToInt32(Convert.ToUInt32(ycoor) + 5);
                     Accept.Draw();
                     Deny.Draw();
                     RectangleShape rect = new RectangleShape(new SFML.System.Vector2f(Program.CHATS_WIDTH - 20, 1));

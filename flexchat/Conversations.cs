@@ -148,7 +148,7 @@ namespace flexchat
                     }
                 }
                 if (TextureId >= 0)
-                    photo.Texture = Content.cache[TextureId].texture;
+                    photo.Texture = Content.GetTexture(TextureId);
                 Program.wnd.Draw(photo);
                 Text text = new Text();
                 text.Font = Content.font;
@@ -245,12 +245,12 @@ namespace flexchat
 
                     if (second_person == creator_id)
                     {
-                        Program.convmenu.posX = Program.wnd.Size.X - Program.convmenu.sizeX;
+                        Program.convmenu.posX = Convert.ToInt32(Program.wnd.Size.X - Program.convmenu.sizeX);
                         Program.convmenu.Draw();
                         if (Program.chgtitle.Status != StatusType.BLOCKED)
                         {
                             Program.chgtitle.posY = 75;
-                            Program.chgtitle.posX = Program.wnd.Size.X - Program.chgtitle.sizeX;
+                            Program.chgtitle.posX = Convert.ToInt32(Program.wnd.Size.X - Program.chgtitle.sizeX);
                             Program.chgtitle.Draw();
                         }
                     }
@@ -288,6 +288,17 @@ namespace flexchat
         public void RequestData(Network Client)
         {
             Client.SendData(Convert.ToString(id), 3);
+        }
+
+        public void UpdateMessages(SFML.Window.MouseButtonEventArgs args)
+        {
+            for (int i = 0; i < messages.Count; i++)
+                messages[i].Update(args);
+        }
+        public void UpdateMessages(SFML.Window.MouseMoveEventArgs args)
+        {
+            for (int i = 0; i < messages.Count; i++)
+                messages[i].Update(args);
         }
 
         public void Update(SFML.Window.MouseMoveEventArgs e)

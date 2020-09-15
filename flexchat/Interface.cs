@@ -10,8 +10,8 @@ namespace flexchat
     }
     class Interface
     {
-        protected uint pos_x;
-        protected uint pos_y;
+        protected int pos_x;
+        protected int pos_y;
         protected uint size_x;
         protected uint size_y;
         protected StatusType status;
@@ -48,12 +48,12 @@ namespace flexchat
             set { size_y = value; }
         }
 
-        public uint posX
+        public int posX
         {
             get { return pos_x; }
             set { pos_x = value; }
         }
-        public uint posY
+        public int posY
         {
             get { return pos_y; }
             set { pos_y = value; }

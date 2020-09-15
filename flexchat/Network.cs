@@ -15,6 +15,7 @@ namespace flexchat
             public ushort id;
             public string respond;
             public uint mode;
+            public string Inf;
         }
 
         public SortedSet<int> FilesAsked = new SortedSet<int>();
@@ -52,6 +53,7 @@ namespace flexchat
             t.id = lastId;
             t.respond = null;
             t.mode = mode;
+            t.Inf = "";
             requests.Add(t);
             string prefix = Convert.ToString((char)0);
             if (Program.session_key != 0)
@@ -86,11 +88,20 @@ namespace flexchat
             }
         }
 
-        public void SendVoice()
+        public void SendVoice(string text)
         {
             int size = Convert.ToInt32(new FileInfo("tosend.wav").Length);
             Program.SendingVoice = true;
-            string prefix = "ftosend.wav " + size.ToString() + " " + '\n';            using (var fin = File.OpenRead("tosend.wav"))
+            tRequest t;
+            lastId++;
+            if (lastId == maxLastRequestId) lastId = 0;
+            t.id = lastId;
+            t.mode = 999;
+            t.respond = string.Empty;
+            t.Inf = Program.ConvSelected.ToString() + " " + text;
+            string prefix =  "ftosend.wav " + t.id.ToString()+ " " + size.ToString() + " " + '\n';
+            requests.Add(t);
+            using (var fin = File.OpenRead("tosend.wav"))
             {
                 byte[] byteArray = new byte[size + prefix.Length];
                 for (int i = 0; i < prefix.Length; i++)
@@ -129,9 +140,12 @@ namespace flexchat
                         if (!was0 && b == 0)
                         {
                             was0 = true;
-                            foreach (tRequest r in requests)
+                            int rqid = int.Parse(data);
+                            int rInd = 0;
+                            while (rInd < requests.Count)
                             {
-                                int rqid = int.Parse(data);
+                                tRequest r = requests[rInd];
+                                rInd++;
                                 if (r.id == rqid)
                                 {
                                     if (r.mode == 5)
@@ -173,9 +187,10 @@ namespace flexchat
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    continue;
+                    if (e.Data.ToString() != "System.Collections.ListDictionaryInternal")
+                        continue;
                 }
                 if (f && data.Length > 0)
                 {
@@ -187,8 +202,11 @@ namespace flexchat
                     }
                     uint r_id = uint.Parse(s_r_id);
                     List<tRequest> toDel = new List<tRequest>();
-                    foreach (tRequest q in requests)
+                    int qInd = 0;
+                    while (qInd < requests.Count)
                     {
+                        tRequest q = requests[qInd];
+                        qInd++;
                         if (q.id == r_id)
                         {
                             tRequest t = q;
